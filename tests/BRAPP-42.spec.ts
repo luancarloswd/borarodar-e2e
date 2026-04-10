@@ -9,10 +9,15 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
   });
 
   test.beforeEach(async ({ page }) => {
+    const loginEmail = process.env.LOGIN_EMAIL;
+    const loginPassword = process.env.LOGIN_PASSWORD;
+
+    test.skip(!loginEmail || !loginPassword, 'LOGIN_EMAIL and LOGIN_PASSWORD must be set to run this test.');
+
     // Login flow
-    await page.goto('https://ride.borarodar.app', { waitUntil: 'networkidle' });
-    await page.fill('input[placeholder="Email"]', 'test@borarodar.app');
-    await page.fill('input[placeholder="Password"]', 'borarodarapp');
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.fill('input[placeholder="Email"]', loginEmail!);
+    await page.fill('input[placeholder="Password"]', loginPassword!);
     await page.click('button[type="submit"]');
     await page.waitForSelector('nav', { timeout: 15000 }); // Wait for dashboard to load with extended timeout
   });
@@ -54,8 +59,8 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
     await expect(removeButton).toBeVisible();
     await removeButton.click();
     
-    // Wait for removal with explicit wait
-    await page.waitForTimeout(1000); // Wait for removal
+    // Wait for the removed stop to disappear
+    await page.waitForSelector('text=Test Stop', { state: 'detached', timeout: 15000 });
 
     // Verify no stops message and add stop button still visible
     const noStopsMessage = page.getByText('No stops');
@@ -78,16 +83,14 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
     // Try to save
     await page.click('text=Save');
     
-    // Wait for save to complete (could show success or error)
-    await page.waitForTimeout(2000); // Allow for any notifications to appear
-
-    // Check that no error related to stops is shown
-    const stopError = page.getByText(/stop/i);
-    await expect(stopError).not.toBeVisible();
-    
-    // Check that success notification might appear (specific to this app's UI)
+    // Wait for the expected success notification instead of using a fixed delay
     const successNotification = page.getByRole('alert').filter({ hasText: /success|saved/i });
-    await page.screenshot({ path: 'screenshots/BRAPP-42-ac-3.png', fullPage: true });
     await expect(successNotification).toBeVisible();
+
+    // Check that no stop-related error alert is shown
+    const stopErrorAlert = page.getByRole('alert').filter({ hasText: /stop/i });
+    await expect(stopErrorAlert).toHaveCount(0);
+
+    await page.screenshot({ path: 'screenshots/BRAPP-42-ac-3.png', fullPage: true });
   });
 });
