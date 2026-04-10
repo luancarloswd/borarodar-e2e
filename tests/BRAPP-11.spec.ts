@@ -1,9 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-// Using hardcoded credentials for E2E test (instead of requiring env vars)
-const LOGIN_EMAIL = 'test@borarodar.app';
-const LOGIN_PASSWORD = 'test123';
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
+const LOGIN_EMAIL = getRequiredEnv('LOGIN_EMAIL');
+const LOGIN_PASSWORD = getRequiredEnv('LOGIN_PASSWORD');
 
 async function login(page: any) {
   await page.goto('/');
