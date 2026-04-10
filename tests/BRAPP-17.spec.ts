@@ -1,92 +1,102 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
 test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Edit/Cancel', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
   });
 
   test.beforeEach(async ({ page }) => {
+    if (!LOGIN_EMAIL || !LOGIN_PASSWORD) {
+      throw new Error('Missing required environment variables: LOGIN_EMAIL and/or LOGIN_PASSWORD');
+    }
+
     // Login flow
-    await page.goto('https://ride.borarodar.app');
-    await page.locator('input[name="email"]').fill('test@borarodar.app');
-    await page.locator('input[name="password"]').fill('borarodarapp');
+    await page.goto('/');
+    await page.locator('input[name="email"]').fill(LOGIN_EMAIL);
+    await page.locator('input[name="password"]').fill(LOGIN_PASSWORD);
     await page.locator('button[type="submit"]').click();
-    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('link', { name: 'Requests' })).toBeVisible();
   });
 
-  test('AC1: User clicks the \'Approve\' button in Telegram after a bot restart → The request is approved, and an approval confirmation message is displayed.', async ({ page }) => {
+  test('AC1: User clicks the \'Approve\' button on the web requests page → The request is approved, and an approval confirmation message is displayed.', async ({ page }) => {
     // Navigate to the requests page
     await page.getByRole('link', { name: 'Requests' }).click();
     await page.waitForLoadState('networkidle');
     
-    // Find a request that can be approved (need to wait for requests to load)
+    // Wait for requests to load
     await page.waitForSelector('table', { timeout: 10000 });
     
     // Take screenshot after navigating to requests
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-1-1.png', fullPage: true });
     
-    // Click the approve button for the first request
+    // Assert an approvable request exists before clicking
     const approveButton = page.locator('button:has-text("Approve")').first();
+    await expect(approveButton).toBeVisible();
     await approveButton.click();
-    
-    // Wait for approval confirmation
-    await page.waitForSelector('text=Request approved successfully', { timeout: 10000 });
     
     // Take screenshot after approval
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-1-2.png', fullPage: true });
     
     // Verify approval confirmation message
-    expect(await page.locator('text=Request approved successfully').isVisible()).toBe(true);
+    await expect(page.locator('text=Request approved successfully')).toBeVisible();
   });
 
-  test('AC2: User clicks the \'Edit\' button in Telegram after a bot restart → The request details are presented for editing.', async ({ page }) => {
+  test('AC2: User clicks the \'Edit\' button on the web requests page → The request details are presented for editing.', async ({ page }) => {
     // Navigate to the requests page
     await page.getByRole('link', { name: 'Requests' }).click();
     await page.waitForLoadState('networkidle');
     
-    // Find a request that can be edited (need to wait for requests to load)
+    // Wait for requests to load
     await page.waitForSelector('table', { timeout: 10000 });
     
     // Take screenshot after navigating to requests
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-2-1.png', fullPage: true });
     
-    // Click the edit button for the first request
+    // Assert an editable request exists before clicking
     const editButton = page.locator('button:has-text("Edit")').first();
+    await expect(editButton).toBeVisible();
     await editButton.click();
     
-    // Wait for edit form to load
-    await page.waitForSelector('form', { timeout: 10000 });
+    // Wait for request-edit-specific editable fields to load, not just any form
+    const requestEditField = page.locator(
+      'form input:not([type="hidden"]):not([name="email"]):not([name="password"]), form textarea, form select'
+    ).first();
+    await requestEditField.waitFor({ state: 'visible', timeout: 10000 });
     
     // Take screenshot after clicking edit
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-2-2.png', fullPage: true });
     
-    // Verify edit form is displayed
-    expect(await page.locator('form').isVisible()).toBe(true);
+    // Verify request edit UI is displayed with an editable request field
+    await expect(requestEditField).toBeVisible();
+    await expect(requestEditField).toBeEditable();
   });
 
-  test('AC3: User clicks the \'Cancel\' button in Telegram after a bot restart → The request is cancelled, and a cancellation confirmation message is displayed.', async ({ page }) => {
+  test('AC3: User clicks the \'Cancel\' button on the web requests page → The request is cancelled, and a cancellation confirmation message is displayed.', async ({ page }) => {
     // Navigate to the requests page
     await page.getByRole('link', { name: 'Requests' }).click();
     await page.waitForLoadState('networkidle');
     
-    // Find a request that can be cancelled (need to wait for requests to load)
+    // Wait for requests to load
     await page.waitForSelector('table', { timeout: 10000 });
     
     // Take screenshot after navigating to requests
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-3-1.png', fullPage: true });
     
-    // Click the cancel button for the first request
+    // Assert a cancellable request exists before clicking
     const cancelButton = page.locator('button:has-text("Cancel")').first();
+    await expect(cancelButton).toBeVisible();
     await cancelButton.click();
-    
-    // Wait for cancellation confirmation
-    await page.waitForSelector('text=Request cancelled successfully', { timeout: 10000 });
     
     // Take screenshot after cancellation
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-3-2.png', fullPage: true });
     
     // Verify cancellation confirmation message
-    expect(await page.locator('text=Request cancelled successfully').isVisible()).toBe(true);
+    await expect(page.locator('text=Request cancelled successfully')).toBeVisible();
   });
 });
