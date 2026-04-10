@@ -40,6 +40,9 @@ test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Ed
     await expect(approveButton).toBeVisible();
     await approveButton.click();
     
+    // Wait for the approval confirmation message to appear
+    await page.waitForSelector('text=Request approved successfully', { timeout: 10000 });
+    
     // Take screenshot after approval
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-1-2.png', fullPage: true });
     
@@ -92,6 +95,9 @@ test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Ed
     const cancelButton = page.locator('button:has-text("Cancel")').first();
     await expect(cancelButton).toBeVisible();
     await cancelButton.click();
+    
+    // Wait for the cancellation confirmation message to appear
+    await page.waitForSelector('text=Request cancelled successfully', { timeout: 10000 });
     
     // Take screenshot after cancellation
     await page.screenshot({ path: 'screenshots/BRAPP-17-ac-3-2.png', fullPage: true });
