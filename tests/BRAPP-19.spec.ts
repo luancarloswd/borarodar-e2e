@@ -8,7 +8,7 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
 
   test.beforeEach(async ({ page }) => {
     // Login flow
-    await page.goto(process.env.BASE_URL ? process.env.BASE_URL : '/');
+    await page.goto('/');
     
     // Wait for login elements to be visible
     await page.waitForSelector('input[name="email"]');
@@ -58,7 +58,7 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     const openedMenu = page.locator('[role="menu"], .menu, .loc-menu, .dropdown-menu').first();
     await expect(openedMenu).toBeVisible();
     
-    const menuItems= openedMenu.locator('.menu-item:visible, [role="menuitem"]:visible, button:visible, a:visible');
+    const menuItems = openedMenu.locator('.menu-item:visible, [role="menuitem"]:visible, button:visible, a:visible');
     const count = await menuItems.count();
     
     for (let i = 0; i < count; i++) {
