@@ -1,0 +1,28 @@
+# borarodar-e2e
+
+End-to-end tests for Borarodar apps using Playwright.
+
+## Setup
+\\\ash
+npm install
+npx playwright install
+\\\
+
+## Run
+\\\ash
+npx playwright test
+\\\
+"@ | Set-Content README.md -Encoding UTF8
+
+@"
+{
+  "name": "borarodar-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0"
+  }
+}
