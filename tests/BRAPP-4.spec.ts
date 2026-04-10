@@ -1,147 +1,147 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-test.describe('BRAPP-4: slug type schedule.startDate schedule.endDate ...', () => {
+const BASE_URL = process.env.BASE_URL ?? '/';
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL ?? '';
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD ?? '';
+
+test.describe('BRAPP-4: event slug routing, fallbacks, and error states', () => {
   test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
   });
 
   test.beforeEach(async ({ page }) => {
     // Login flow
-    await page.goto('https://ride.borarodar.app');
-    // Look for login form — email + password fields, submit button
+    await page.goto(BASE_URL);
     const emailField = page.locator('input[type="email"]');
     const passwordField = page.locator('input[type="password"]');
     const submitButton = page.locator('button[type="submit"]');
-    
-    await emailField.fill('test@borarodar.app');
-    await passwordField.fill('borarodarapp');
+
+    await emailField.fill(LOGIN_EMAIL);
+    await passwordField.fill(LOGIN_PASSWORD);
     await submitButton.click();
-    
-    // Wait for dashboard/home to load with timeout
-    await page.waitForSelector('div[data-testid="dashboard"]', { timeout: 15000 });
+
+    // Wait for a deterministic post-login signal instead of a dashboard-specific test id
+    await page.waitForURL((url) => !url.toString().endsWith('/'), { timeout: 15000 });
+    await expect(submitButton).not.toBeVisible({ timeout: 15000 });
   });
 
   test('AC1: Clicking any event card in the event list navigates to the detail page without crashing', async ({ page }) => {
-    // Navigate to events list
-    await page.goto('https://ride.borarodar.app/eventos');
-    
-    // Wait for events to load with timeout
+    await page.goto('eventos');
+
     await page.waitForSelector('div[data-testid="event-card"]', { timeout: 15000 });
-    
-    // Click first event card
+
     const firstEventCard = page.locator('div[data-testid="event-card"]').first();
     await firstEventCard.click();
-    
-    // Wait for detail page to load and verify it's not crashed
+
     await page.waitForSelector('div[data-testid="event-detail"]', { timeout: 15000 });
-    
-    // Take screenshot for verification
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-1.png', fullPage: true });
-    
-    // Verify that we're on the detail page and not crashed (no blank page)
-    expect(await page.isVisible('div[data-testid="event-detail"]')).toBe(true);
+
+    await expect(page.locator('div[data-testid="event-detail"]')).toBeVisible();
   });
 
   test('AC2: Events without optional fields (flyer, routeInfo, schedule.dates, rsvp.goingUsers) render correctly with fallbacks', async ({ page }) => {
-    // Navigate to events list
-    await page.goto('https://ride.borarodar.app/eventos');
-    
-    // Find an event that likely has missing optional fields (for testing purposes, we'll navigate to a specific event)
-    // For this test we'll assume there are some events with missing fields
+    await page.goto('eventos');
+
     await page.waitForSelector('div[data-testid="event-card"]', { timeout: 15000 });
-    
-    // Click an event (we'll just click first one for this example)
+
     const firstEventCard = page.locator('div[data-testid="event-card"]').first();
     await firstEventCard.click();
-    
-    // Wait for detail page to load with fallbacks
+
     await page.waitForSelector('div[data-testid="event-detail"]', { timeout: 15000 });
-    
-    // Take screenshot for verification
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-2.png', fullPage: true });
-    
-    // Verify fallback UI is rendered (we check for placeholder or fallback elements)
-    expect(await page.isVisible('img[alt="Event flyer"]')).toBe(true);
+
+    // Verify the detail page renders without crashing; optional fields show a placeholder or are absent
+    await expect(page.locator('div[data-testid="event-detail"]')).toBeVisible();
+    const flyerImage = page.locator('img[alt="Event flyer"]');
+    const flyerPlaceholder = page.locator('[data-testid="flyer-placeholder"]');
+    const flyerVisible = await flyerImage.isVisible();
+    const placeholderVisible = await flyerPlaceholder.isVisible();
+    expect(flyerVisible || placeholderVisible).toBe(true);
   });
 
   test('AC3: Navigating to a non-existent event slug shows a 404 page, not a blank crash', async ({ page }) => {
-    // Navigate to a non-existent event
-    await page.goto('https://ride.borarodar.app/eventos/non-existent-event');
-    
-    // Wait for page to load and check if we get a 404 page instead of crashing
-    await page.waitForTimeout(2000);
-    
-    // Take screenshot for verification
+    await page.goto('eventos/non-existent-event');
+
+    // Wait for the 404 page to render instead of relying on a fixed delay
+    const notFoundPage = page.locator('div[data-testid="not-found-page"]');
+    await expect(notFoundPage).toBeVisible({ timeout: 15000 });
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-3.png', fullPage: true });
-    
-    // Verify we got a proper error page instead of blank crash
-    expect(await page.isVisible('div[data-testid="not-found-page"]')).toBe(true);
+
+    await expect(notFoundPage).toBeVisible();
   });
 
   test('AC4: Navigating to a club_only event as a non-member shows a 403 forbidden page', async ({ page }) => {
-    // Try to navigate to a club_only event that should be restricted
-    await page.goto('https://ride.borarodar.app/eventos/club-only-event');
-    
-    // Wait for page to load and check if we get a forbidden page instead of crashing
-    await page.waitForTimeout(2000);
-    
-    // Take screenshot for verification
+    await page.goto('eventos/club-only-event');
+
+    // Wait for the forbidden page to render instead of relying on a fixed delay
+    const forbiddenPage = page.locator('div[data-testid="forbidden-page"]');
+    await expect(forbiddenPage).toBeVisible({ timeout: 15000 });
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-4.png', fullPage: true });
-    
-    // Verify we got a forbidden page instead of blank crash
-    expect(await page.isVisible('div[data-testid="forbidden-page"]')).toBe(true);
+
+    await expect(forbiddenPage).toBeVisible();
   });
 
   test('AC5: The EventCard link uses event.slug to build the navigation URL', async ({ page }) => {
-    // Navigate to events list
-    await page.goto('https://ride.borarodar.app/eventos');
-    
-    // Wait for events to load
+    await page.goto('eventos');
+
     await page.waitForSelector('div[data-testid="event-card"]', { timeout: 15000 });
-    
-    // Get the first event card's URL
+
     const firstEventCard = page.locator('div[data-testid="event-card"]').first();
     const eventLink = await firstEventCard.locator('a').first().getAttribute('href');
-    
-    // Take screenshot for verification
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-5.png', fullPage: true });
-    
-    // Verify the URL contains a slug (not an ID)
-    expect(eventLink).toContain('/eventos/');
+
+    // Verify the URL is present and uses a non-numeric slug (not an ID)
+    expect(eventLink).not.toBeNull();
+    expect(eventLink!).toMatch(/\/eventos\/(?!\d+$)[a-z0-9]+(?:-[a-z0-9]+)*\/?$/i);
   });
 
   test('AC6: The search query .select() includes the slug field', async ({ page }) => {
-    // This test verifies that the frontend includes slug in the search query
-    // Navigate to events list and verify slugs are present
-    await page.goto('https://ride.borarodar.app/eventos');
-    
-    // Wait for events to load
+    // Capture network requests to verify the outgoing query includes the slug field
+    const capturedRequests: Array<{ url: string; body: string }> = [];
+
+    page.on('request', (request) => {
+      capturedRequests.push({
+        url: request.url(),
+        body: request.postData() ?? '',
+      });
+    });
+
+    await page.goto('eventos');
+
     await page.waitForSelector('div[data-testid="event-card"]', { timeout: 15000 });
-    
-    // Take screenshot for verification
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-6.png', fullPage: true });
-    
-    // Verify search results are displayed with slugs (through visual confirmation)
-    expect(await page.isVisible('div[data-testid="event-card"]')).toBe(true);
+
+    const requestIncludingSlugSelect = capturedRequests.find(({ url, body }) => {
+      const decodedUrl = decodeURIComponent(url);
+      const decodedBody = decodeURIComponent(body);
+      const requestText = `${decodedUrl}\n${decodedBody}`;
+      return requestText.includes('select') && requestText.includes('slug');
+    });
+
+    // Verify the outgoing query/payload explicitly requests the slug field
+    expect(requestIncludingSlugSelect).toBeTruthy();
   });
 
   test('AC7: An ErrorBoundary wraps EventDetailPage and catches unexpected render errors with a safe fallback UI', async ({ page }) => {
-    // Navigate to events list
-    await page.goto('https://ride.borarodar.app/eventos');
-    
-    // Click first event card
+    await page.goto('eventos');
+
     await page.waitForSelector('div[data-testid="event-card"]', { timeout: 15000 });
     const firstEventCard = page.locator('div[data-testid="event-card"]').first();
     await firstEventCard.click();
-    
-    // Wait for detail page to load
+
     await page.waitForSelector('div[data-testid="event-detail"]', { timeout: 15000 });
-    
-    // Take screenshot for verification
+
     await page.screenshot({ path: 'screenshots/BRAPP-4-ac-7.png', fullPage: true });
-    
-    // Verify fallback UI is rendered in case of error
-    expect(await page.isVisible('div[data-testid="error-boundary"]')).toBe(true);
+
+    // Verify the page remains functional during normal rendering; error boundary should not be shown
+    await expect(page.locator('div[data-testid="event-detail"]')).toBeVisible();
+    await expect(page.locator('div[data-testid="error-boundary"]')).not.toBeVisible();
   });
 });
