@@ -8,7 +8,7 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
 
   test.beforeEach(async ({ page }) => {
     // Login flow
-    await page.goto(process.env.BASE_URL ?? 'https://ride.borarodar.app');
+    await page.goto(process.env.BASE_URL ? process.env.BASE_URL : '/');
     
     // Wait for login elements to be visible
     await page.waitForSelector('input[name="email"]');
@@ -16,15 +16,20 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     await page.waitForSelector('button[type="submit"]');
 
     // Fill credentials
-    await page.fill('input[name="email"]', process.env.LOGIN_EMAIL ?? 'test@borodarapp.app');
-    await page.fill('input[name="password"]', process.env.LOGIN_PASSWORD ?? 'borodarapp');
+    const loginEmail = process.env.LOGIN_EMAIL;
+    const loginPassword = process.env.LOGIN_PASSWORD;
+    if (!loginEmail || !loginPassword) {
+      throw new Error('LOGIN_EMAIL and LOGIN_PASSWORD environment variables must be set');
+    }
+    await page.fill('input[name="email"]', loginEmail);
+    await page.fill('input[name="password"]', loginPassword);
     await page.click('button[type="submit"]');
 
     // Wait for dashboard/home to load by checking for a known element (e.g., navigation bar)
     await page.waitForSelector('nav, [role="navigation"], .bottom-nav', { timeout: 30000 });
   });
 
-  test('AC1: User clicks the \'Mais\' (More) button in the bottom navigation bar ╬ô├Ñ├å The \'Perfil\' (Profile) option is not displayed in the opened menu.', async ({ page }) => {
+  test('AC1: User clicks the \'Mais\' (More) button in the bottom navigation bar → The \'Perfil\' (Profile) option is not displayed in the opened menu.', async ({ page }) => {
     // Find the 'Mais' (More) button. Based on typical mobile bottom nav, it might have text or an icon.
     const maisButton = page.getByTestId('tab-mais');
     await expect(maisButton).toBeVisible();
@@ -42,7 +47,7 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     await page.screenshot({ path: 'screenshots/BRAPP-19-ac-1.png', fullPage: true });
   });
 
-  test('AC2: User navigates through all menu items within the \'Mais\' (More) menu ╬ô├Ñ├å The \'Perfil\' (Profile) option is consistently absent from the list of actions.', async ({ page }) => {
+  test('AC2: User navigates through all menu items within the \'Mais\' (More) menu → The \'Perfil\' (Profile) option is consistently absent from the list of actions.', async ({ page }) => {
     const maisButton = page.getByTestId('tab-mais');
     await maisButton.click();
 
@@ -66,7 +71,7 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     await page.screenshot({ path: 'screenshots/BRAPP-19-ac-2.png', fullPage: true });
   });
 
-  test('AC3: User interacts with the bottom navigation bar to open the \'Mais\' (More) menu ╬ô├Ñ├å No clickable element labeled \'Perfil\' or \'Profile\' is found within the menu\'s visible area.', async ({ page }) => {
+  test('AC3: User interacts with the bottom navigation bar to open the \'Mais\' (More) menu → No clickable element labeled \'Perfil\' or \'Profile\' is found within the menu\'s visible area.', async ({ page }) => {
     const maisButton = page.getByTestId('tab-mais');
     await maisButton.click();
 
