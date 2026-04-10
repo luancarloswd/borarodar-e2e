@@ -30,6 +30,9 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     await expect(maisButton).toBeVisible();
     await maisButton.click();
 
+    // Wait for menu to open
+    await page.waitForSelector('[role="menu"], .menu, .loc-menu, .dropdown-menu', { timeout: 15000 });
+    
     // Check if 'Perfil' is NOT in the menu
     const openedMenu = page.locator('[role="menu"], .menu, .loc-menu, .dropdown-menu').first();
     await expect(openedMenu).toBeVisible();
@@ -43,7 +46,13 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     const maisButton = page.getByTestId('tab-mais');
     await maisButton.click();
 
+    // Wait for menu to open
+    await page.waitForSelector('[role="menu"], .menu, .loc-menu, .dropdown-menu', { timeout: 15000 });
+    
     // Get all visible menu items only within the opened menu
+    const openedMenu = page.locator('[role="menu"], .menu, .loc-menu, .dropdown-menu').first();
+    await expect(openedMenu).toBeVisible();
+    
     const menuItems = openedMenu.locator('.menu-item:visible, [role="menuitem"]:visible, button:visible, a:visible');
     const count = await menuItems.count();
     
@@ -61,8 +70,11 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     const maisButton = page.getByTestId('tab-mais');
     await maisButton.click();
 
+    // Wait for menu to open
+    await page.waitForSelector('[role="menu"], .menu, .loc-menu, .dropdown-menu', { timeout: 15000 });
+    
     // Scope the search to the opened visible 'Mais' menu container
-    const openedMenu = page.locator('[role="menu"], .menu, .dropdown-menu:visible').first();
+    const openedMenu = page.locator('[role="menu"], .menu, .loc-menu, .dropdown-menu').first();
     await expect(openedMenu).toBeVisible();
 
     // Check for any clickable element with 'Perfil' or 'Profile' text only within the opened menu
