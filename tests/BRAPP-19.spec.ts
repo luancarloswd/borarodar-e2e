@@ -8,7 +8,7 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
 
   test.beforeEach(async ({ page }) => {
     // Login flow
-    await page.goto(process.env.BASE_URL ? process.env.BASE_URL : '/');
+    await page.goto('/');
     
     // Wait for login elements to be visible
     await page.waitForSelector('input[name="email"]');
