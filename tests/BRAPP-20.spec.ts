@@ -12,7 +12,7 @@ test.describe('BRAPP-20: Fix: Leaderboard must include all registered riders reg
     const password = process.env.LOGIN_PASSWORD || 'borarodarapp';
 
     await page.goto(baseUrl);
-    // Login flow: Look for login form ╬ô├ç├╢ email + password fields, submit button
+    // Login flow: Look for login form email + password fields, submit button
     // Fill credentials and submit
     await page.fill('input[name="email"], input[type="email"]', email);
     await page.fill('input[name="password"], input[type="password"]', password);
@@ -22,7 +22,7 @@ test.describe('BRAPP-20: Fix: Leaderboard must include all registered riders reg
     await expect(page.locator('input[name="email"], input[type="email"]')).not.toBeVisible({ timeout: 15000 });
   });
 
-  test('AC1: User navigates to the global leaderboard page ╬ô├Ñ├å A newly registered user who has earned 0 points is displayed in the leaderboard.', async ({ page }) => {
+  test('AC1: User navigates to the global leaderboard page. A newly registered user who has earned 0 points is displayed in the leaderboard.', async ({ page }) => {
     const baseUrl = process.env.BASE_URL || 'https://ride.borarodar.app';
     await page.goto(`${baseUrl.replace(/\/$/, '')}/leaderboard`);
     await page.waitForSelector('.leaderboard-item, .rider-row, [role="listitem"]'); 
@@ -35,7 +35,7 @@ test.describe('BRAPP-20: Fix: Leaderboard must include all registered riders reg
     await page.screenshot({ path: 'screenshots/BRAPP-20-ac-1.png', fullPage: true });
   });
 
-  test('AC2: User views the global leaderboard page ╬ô├Ñ├å Riders are ordered by total points in descending order, with riders who have 0 points appearing at the bottom of the list.', async ({ page }) => {
+  test('AC2: User views the global leaderboard page. Riders are ordered by total points in descending order, with riders who have 0 points appearing at the bottom of the list.', async ({ page }) => {
     const baseUrl = process.env.BASE_URL || 'https://ride.borarodar.app';
     await page.goto(`${baseUrl.replace(/\/$/, '')}/leaderboard`);
     await page.waitForSelector('.leaderboard-item, .rider-row, [role="listitem"]');
@@ -76,7 +76,7 @@ test.describe('BRAPP-20: Fix: Leaderboard must include all registered riders reg
     await page.screenshot({ path: 'screenshots/BRAPP-20-ac-2.png', fullPage: true });
   });
 
-  test('AC3: User navigates to the global leaderboard page ╬ô├Ñ├å Any inactive (soft-deleted) user accounts are not present in the displayed leaderboard.', async ({ page }) => {
+  test('AC3: User navigates to the global leaderboard page. Any inactive (soft-deleted) user accounts are not present in the displayed leaderboard.', async ({ page }) => {
     const baseUrl = process.env.BASE_URL || 'https://ride.borarodar.app';
     await page.goto(`${baseUrl.replace(/\/$/, '')}/leaderboard`);
     await page.waitForSelector('.leaderboard-item, .rider-row, [role="listitem"]');
@@ -86,7 +86,7 @@ test.describe('BRAPP-20: Fix: Leaderboard must include all registered riders reg
     await page.screenshot({ path: 'screenshots/BRAPP-20-ac-3.png', fullPage: true });
   });
 
-  test('AC4: User views the global leaderboard page ╬ô├Ñ├å The rank, total points, and other associated data for existing riders with points remain unchanged and are displayed correctly.', async ({ page }) => {
+  test('AC4: User views the global leaderboard page. The rank, total points, and other associated data for existing riders with points remain unchanged and are displayed correctly.', async ({ page }) => {
     const baseUrl = process.env.BASE_URL || 'https://ride.borarodar.app';
     await page.goto(`${baseUrl.replace(/\/$/, '')}/leaderboard`);
     await page.waitForSelector('.leaderboard-item, .rider-row, [role="listitem"]');
