@@ -24,7 +24,7 @@ test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Ed
     await expect(page.getByRole('link', { name: 'Requests' })).toBeVisible();
   });
 
-  test('AC1: User clicks the \'Approve\' button on the web requests page → The request is approved, and an approval confirmation message is displayed.', async ({ page }) => {
+  test('AC1: User clicks the 'Approve' button on the web requests page → The request is approved, and an approval confirmation message is displayed.', async ({ page }) => {
     // Navigate to the requests page
     await page.getByRole('link', { name: 'Requests' }).click();
     await page.waitForLoadState('networkidle');
@@ -50,7 +50,7 @@ test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Ed
     await expect(page.locator('text=Request approved successfully')).toBeVisible();
   });
 
-  test('AC2: User clicks the \'Edit\' button on the web requests page → The request details are presented for editing.', async ({ page }) => {
+  test('AC2: User clicks the 'Edit' button on the web requests page → The request details are presented for editing.', async ({ page }) => {
     // Navigate to the requests page
     await page.getByRole('link', { name: 'Requests' }).click();
     await page.waitForLoadState('networkidle');
@@ -80,7 +80,7 @@ test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Ed
     await expect(requestEditField).toBeEditable();
   });
 
-  test('AC3: User clicks the \'Cancel\' button on the web requests page → The request is cancelled, and a cancellation confirmation message is displayed.', async ({ page }) => {
+  test('AC3: User clicks the 'Cancel' button on the web requests page → The request is cancelled, and a cancellation confirmation message is displayed.', async ({ page }) => {
     // Navigate to the requests page
     await page.getByRole('link', { name: 'Requests' }).click();
     await page.waitForLoadState('networkidle');
