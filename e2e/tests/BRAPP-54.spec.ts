@@ -69,13 +69,14 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
 
     await page.waitForLoadState('networkidle');
 
-    // Either a table with rows OR the empty state message must be present
-    const hasRows = await page.locator('table tbody tr').count() > 0;
-    const hasEmptyState = await page.locator('text=Nenhum abastecimento registrado').isVisible();
-
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac2-empty-or-list.png' });
 
-    // At least one of them should be visible
+    // Check if the empty state is visible
+    const hasEmptyState = await page.locator('text=Nenhum abastecimento registrado').isVisible();
+
+    // Check if there are any rows in the table
+    const hasRows = await page.locator('table tbody tr').count() > 0;
+
     // Fix: Be more specific about validation - check actual existence of elements
     if (hasRows) {
       // If rows exist, ensure the empty state is not visible
@@ -85,7 +86,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
       // If empty state visible, ensure no rows are present
       await expect(page.locator('table tbody tr')).toHaveCount(0);
     }
-    
+
     // At least one of them must be present (this is more robust than the original logic)
     expect(hasRows || hasEmptyState).toBe(true);
   });
