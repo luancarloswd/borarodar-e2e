@@ -1,9 +1,19 @@
 import { test, expect } from '@playwright/test';
-import { mkdirSync } from 'fs';
+import { mkdirSync, existsSync, lstatSync } from 'fs';
+import { resolve } from 'path';
 
 test.describe('BRAPP-52: Fix: Route registration from KML file fails due to missing waypoint coordinates', () => {
   test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
+  });
+
+  test.beforeEach(async ({ page }) => {
+    // Login flow
+    await page.goto('https://ride.borarodar.app');
+    await page.locator('input[type="email"]').fill('test@borarodar.app');
+    await page.locator('input[type="password"]').fill('borarodarapp');
+    await page.locator('button[type="submit"]').click();
+    await page.waitForSelector('nav'); // Wait for dashboard to load
   });
 
   test.beforeEach(async ({ page }) => {
@@ -20,7 +30,7 @@ test.describe('BRAPP-52: Fix: Route registration from KML file fails due to miss
     await page.getByRole('link', { name: 'Create Route' }).click();
     
     // Upload KML file
-    await page.locator('input[type="file"]').setInputFiles('tests/fixtures/test.kml');
+    await page.locator('input[type="file"]').setInputFiles('e2e/tests/fixtures/test.kml');
     
     // Wait for file to be processed and verify waypoints are shown
     await page.waitForSelector('.waypoint-list');
@@ -44,7 +54,7 @@ test.describe('BRAPP-52: Fix: Route registration from KML file fails due to miss
     await page.getByRole('link', { name: 'Create Route' }).click();
     
     // Upload KML file
-    await page.locator('input[type="file"]').setInputFiles('src/fixtures/valid-route.kml');
+    await page.locator('input[type="file"]').setInputFiles('e2e/tests/fixtures/valid-route.kml');
     
     // Wait for file to be processed and verify waypoints are shown
     await page.waitForSelector('.waypoint-list');
@@ -63,7 +73,7 @@ test.describe('BRAPP-52: Fix: Route registration from KML file fails due to miss
     await page.getByRole('link', { name: 'Create Route' }).click();
     
     // Upload KML file
-    await page.locator('input[type="file"]').setInputFiles('tests/fixtures/test.kml');
+    await page.locator('input[type="file"]').setInputFiles('e2e/tests/fixtures/test.kml');
     
     // Wait for file to be processed
     await page.waitForSelector('.waypoint-list');
@@ -87,7 +97,7 @@ test.describe('BRAPP-52: Fix: Route registration from KML file fails due to miss
     await page.getByRole('link', { name: 'Create Route' }).click();
     
     // Upload malformed KML file
-    await page.locator('input[type="file"]').setInputFiles('tests/fixtures/invalid.kml');
+    await page.locator('input[type="file"]').setInputFiles('e2e/tests/fixtures/invalid.kml');
     
     // Wait for validation error
     await page.waitForSelector('.error-message');
@@ -106,7 +116,7 @@ test.describe('BRAPP-52: Fix: Route registration from KML file fails due to miss
     await page.getByRole('link', { name: 'Create Route' }).click();
     
     // Upload KML file
-    await page.locator('input[type="file"]').setInputFiles('src/fixtures/valid-route.kml');
+    await page.locator('input[type="file"]').setInputFiles('e2e/tests/fixtures/valid-route.kml');
     
     // Wait for file to be processed
     await page.waitForSelector('.waypoint-list');
