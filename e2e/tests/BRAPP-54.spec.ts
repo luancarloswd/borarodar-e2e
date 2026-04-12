@@ -44,7 +44,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac1-motorcycle-list.png' });
 
     // Click on the first motorcycle card to open the detail page
-    const motoCard = page.locator('[data-testid="moto-card"], [href*="/motorcycles/"], a[href*="/motorcycles/"]').first();
+    const motoCard = page.locator('[data-testid="moto-card"]').first();
     await expect(motoCard).toBeVisible({ timeout: 10000 });
     await motoCard.click();
 
@@ -63,7 +63,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.waitForLoadState('networkidle');
 
     // Click the first motorcycle
-    const motoCard = page.locator('[data-testid="moto-card"], [href*="/motorcycles/"], a[href*="/motorcycles/"]').first();
+    const motoCard = page.locator('[data-testid="moto-card"]').first();
     await expect(motoCard).toBeVisible({ timeout: 10000 });
     await motoCard.click();
 
@@ -75,7 +75,18 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
 
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac2-empty-or-list.png' });
 
-    // At least one of them must be true
+    // At least one of them should be visible
+    // Fix: Be more specific about validation - check actual existence of elements
+    if (hasRows) {
+      // If rows exist, ensure the empty state is not visible
+      await expect(page.locator('text=Nenhum abastecimento registrado')).not.toBeVisible();
+    }
+    if (hasEmptyState) {
+      // If empty state visible, ensure no rows are present
+      await expect(page.locator('table tbody tr')).toHaveCount(0);
+    }
+    
+    // At least one of them must be present (this is more robust than the original logic)
     expect(hasRows || hasEmptyState).toBe(true);
   });
 
@@ -84,7 +95,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.goto(`${BASE_URL}/motorcycles`);
     await page.waitForLoadState('networkidle');
 
-    const motoCard = page.locator('[data-testid="moto-card"], [href*="/motorcycles/"], a[href*="/motorcycles/"]').first();
+    const motoCard = page.locator('[data-testid="moto-card"]').first();
     await expect(motoCard).toBeVisible({ timeout: 10000 });
     await motoCard.click();
 
@@ -104,6 +115,11 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
 
     // Supply count must remain the same after refresh
     const countAfter = await page.locator('table tbody tr').count();
+    
+    // More accurate check: verify that the page loaded correctly and the count is consistent
+    expect(countBefore).toBeGreaterThanOrEqual(0);
+    expect(countAfter).toBeGreaterThanOrEqual(0);
+    // The counts should be the same (or both should be 0)
     expect(countAfter).toBe(countBefore);
 
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac3-supply-count-stable.png' });
@@ -114,12 +130,14 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.goto(`${BASE_URL}/motorcycles`);
     await page.waitForLoadState('networkidle');
 
-    const motoCards = page.locator('[data-testid="moto-card"], [href*="/motorcycles/"], a[href*="/motorcycles/"]');
+    const motoCards = page.locator('[data-testid="moto-card"]');
     const cardCount = await motoCards.count();
 
     if (cardCount < 2) {
       // Only one motorcycle — verify the section exists
-      await motoCards.first().click();
+      const firstMotoCard = page.locator('[data-testid="moto-card"]').first();
+      await expect(firstMotoCard).toBeVisible({ timeout: 10000 });
+      await firstMotoCard.click();
       await page.waitForLoadState('networkidle');
       await expect(page.locator('text=Histórico de abastecimentos')).toBeVisible({ timeout: 10000 });
       await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac4-single-moto.png' });
@@ -127,8 +145,9 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     }
 
     // Navigate to first motorcycle
-    await motoCards.first().click();
-    await page.waitForLoadState('networkidle');
+    const firstMotoCard = page.locator('[data-testid="moto-card"]').first();
+    await expect(firstMotoCard).toBeVisible({ timeout: 10000 });
+    await firstMotoCard.click();
     const url1 = page.url();
     const count1 = await page.locator('table tbody tr').count();
 
@@ -168,7 +187,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.goto(`${BASE_URL}/motorcycles`);
     await page.waitForLoadState('networkidle');
 
-    const motoCard = page.locator('[data-testid="moto-card"], [href*="/motorcycles/"], a[href*="/motorcycles/"]').first();
+    const motoCard = page.locator('[data-testid="moto-card"]').first();
     await expect(motoCard).toBeVisible({ timeout: 10000 });
     await motoCard.click();
 
@@ -178,6 +197,10 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
 
     // The fuel API must have been called (with /fuel in the URL)
     expect(fuelRequests.length).toBeGreaterThan(0);
+
+    // Verify that the API was called with a motorcycle ID (by checking URL structure)
+    const hasFuelRequest = fuelRequests.some(url => url.includes('/fuel/'));
+    expect(hasFuelRequest).toBe(true);
 
     // The fuel history section must be rendered (not missing from the DOM)
     await expect(page.locator('text=Histórico de abastecimentos')).toBeVisible({ timeout: 10000 });
