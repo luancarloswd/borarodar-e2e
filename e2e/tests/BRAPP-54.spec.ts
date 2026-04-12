@@ -77,6 +77,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     // Check if there are any rows in the table
     const hasRows = await page.locator('table tbody tr').count() > 0;
 
+    // At least one of them should be visible
     // Fix: Be more specific about validation - check actual existence of elements
     if (hasRows) {
       // If rows exist, ensure the empty state is not visible
@@ -86,7 +87,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
       // If empty state visible, ensure no rows are present
       await expect(page.locator('table tbody tr')).toHaveCount(0);
     }
-
+    
     // At least one of them must be present (this is more robust than the original logic)
     expect(hasRows || hasEmptyState).toBe(true);
   });
