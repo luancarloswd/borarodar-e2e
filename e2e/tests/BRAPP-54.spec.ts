@@ -72,18 +72,23 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac2-empty-or-list.png' });
 
     // Check if the empty state is visible
-    const emptyStateVisible = await page.locator('text=Nenhum abastecimento registrado').isVisible();
-    
-    // Check if there are any rows in the table
-    const rowExists = await page.locator('table tbody tr').count() > 0;
+    const hasEmptyState = await page.locator('text=Nenhum abastecimento registrado').isVisible();
 
-    // At least one of them should be visible, but not both
-    if (emptyStateVisible) {
-      await expect(page.locator('table tbody tr')).toHaveCount(0);
-    } else if (rowExists) {
+    // Check if there are any rows in the table
+    const hasRows = await page.locator('table tbody tr').count() > 0;
+
+    // Fix: Be more specific about validation - check actual existence of elements
+    if (hasRows) {
+      // If rows exist, ensure the empty state is not visible
       await expect(page.locator('text=Nenhum abastecimento registrado')).not.toBeVisible();
     }
-    // If both are false, it's still valid - the test should just verify there's no error
+    if (hasEmptyState) {
+      // If empty state visible, ensure no rows are present
+      await expect(page.locator('table tbody tr')).toHaveCount(0);
+    }
+
+    // At least one of them must be present (this is more robust than the original logic)
+    expect(hasRows || hasEmptyState).toBe(true);
   });
 
   // AC3: User refreshes motorcycle page → Gas supplies persist without errors
