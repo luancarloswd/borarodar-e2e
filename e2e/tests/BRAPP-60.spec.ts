@@ -54,7 +54,7 @@ test.describe('BRAPP-60: Global Image Lightbox — Tap to Expand Any Image', () 
     // Close by clicking close button
     const closeButton = page.locator('[data-testid="lightbox-close-button"]');
     await expect(closeButton).toBeVisible({ timeout: 15000 });
-    await closeButton.click({ timeout: 15000 });
+    await closeButton.click({ timeout: 10000 });
     
     await page.waitForSelector('[data-testid="lightbox-overlay"]', { state: 'detached', timeout: 15000 });
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-60-ac-2.png', fullPage: true });
@@ -104,7 +104,7 @@ test.describe('BRAPP-60: Global Image Lightbox — Tap to Expand Any Image', () 
     // Click to open lightbox
     await expandableImage.click({ timeout: 10000 });
     
-    // Wait for lightbox to appear and check for placeholder
+    // Wait for lightbox to appear
     await page.waitForSelector('[data-testid="lightbox-overlay"]', { timeout: 15000 });
     await page.waitForSelector('[data-testid="lightbox-image"]', { timeout: 15000 });
     
