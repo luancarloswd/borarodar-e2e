@@ -19,6 +19,8 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     await page.locator('button[type="submit"]').click();
     // Wait for dashboard/home to load
     await page.waitForSelector('text=Eventos');
+    // Additional wait for page to be fully ready
+    await page.waitForLoadState('networkidle');
   });
 
   test('AC1: User registers a new motorcycle and attaches a PDF manual during registration → after submission, the \'Manuais\' section on the motorcycle detail screen displays the uploaded manual with its title, type badge, and file size', async ({ page }) => {
@@ -36,6 +38,7 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     
     // Add manual upload section
     await page.click('button:has-text("Adicionar manual")');
+    await page.waitForLoadState('networkidle');
     
     // Submit motorcycle registration
     await page.click('button:has-text("Salvar")');
@@ -45,7 +48,8 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     await page.screenshot({ path: join('screenshots', 'BRAPP-25-ac-1.png'), fullPage: true });
     
     // Verify manual appears in detail screen
-    await page.waitForSelector('text=Manuais');
+    await page.waitForSelector('text=Manuais', { timeout: 10000 });
+    await page.waitForSelector('text=Manual', { timeout: 10000 });
     await expect(page.locator('text=Manual')).toBeVisible();
   });
 
@@ -60,6 +64,7 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     
     // Add manual upload
     await page.click('button:has-text("Adicionar manual")');
+    await page.waitForLoadState('networkidle');
     
     // Take screenshot after clicking add manual
     await page.screenshot({ path: join('screenshots', 'BRAPP-25-ac-2.png'), fullPage: true });
@@ -69,7 +74,8 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     await page.waitForLoadState('networkidle');
     
     // Verify manual appears in the list
-    await page.waitForSelector('text=Manuais');
+    await page.waitForSelector('text=Manuais', { timeout: 10000 });
+    await page.waitForSelector('text=Manual', { timeout: 10000 });
     await expect(page.locator('text=Manual')).toBeVisible();
   });
 
@@ -84,15 +90,18 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     
     // Add manual upload
     await page.click('button:has-text("Adicionar manual")');
+    await page.waitForLoadState('networkidle');
     
     // Attempt to cancel the upload process
     await page.click('button:has-text("Cancelar")');
+    await page.waitForLoadState('networkidle');
     
     // Take screenshot after attempting to upload
     await page.screenshot({ path: join('screenshots', 'BRAPP-25-ac-3.png'), fullPage: true });
     
     // Verify no error handling or verification needed since file upload is not fully implemented
     // This test mainly checks that we can get to the upload screen
+    await page.waitForSelector('button:has-text("Adicionar manual")', { timeout: 10000 });
   });
 
   test('AC4: User deletes a manual from the \'Manuais\' section on the motorcycle detail screen via the trash icon → the manual is removed from the list immediately', async ({ page }) => {
@@ -105,7 +114,7 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     await page.waitForLoadState('networkidle');
     
     // Wait for manual section to load
-    await page.waitForSelector('text=Manuais');
+    await page.waitForSelector('text=Manuais', { timeout: 10000 });
     
     // Check if there are manuals to delete
     const hasManuals = await page.isVisible('data-testid=manual-item');
@@ -119,6 +128,7 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
       await page.screenshot({ path: join('screenshots', 'BRAPP-25-ac-4.png'), fullPage: true });
       
       // Verify manual is removed
+      await page.waitForSelector('text=Manuais', { timeout: 10000 });
       await expect(page.locator('data-testid=manual-item')).not.toBeVisible();
     }
   });
@@ -138,6 +148,7 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     
     // Add manual upload section
     await page.click('button:has-text("Adicionar manual")');
+    await page.waitForLoadState('networkidle');
     
     // Submit motorcycle registration
     await page.click('button:has-text("Salvar")');
@@ -147,7 +158,8 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
     await page.screenshot({ path: join('screenshots', 'BRAPP-25-ac-5.png'), fullPage: true });
     
     // Verify motorcycle record is saved even with API issues
-    await page.waitForSelector('text=Motos');
+    await page.waitForSelector('text=Motos', { timeout: 10000 });
+    await page.waitForSelector('text=Test Brand 2', { timeout: 10000 });
     await expect(page.locator('text=Test Brand 2')).toBeVisible();
   });
 });
