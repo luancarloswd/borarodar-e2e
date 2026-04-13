@@ -93,7 +93,7 @@ test.describe('BRAPP-49: Fix: AI-generated route save fails due to missing waypo
     await page.screenshot({ path: 'screenshots/BRAPP-49-ac-2-reopen.png', fullPage: true });
     
     // Check that waypoints are displayed on the map with correct positions
-    // Try to find waypoints by various selectors
+    // Try to find waypoints by various selectors (with more reliable selectors)
     const waypointMarkers = page.locator('[data-testid*="waypoint"], [class*="waypoint"], .marker, [data-testid*="marker"]');
     await expect(waypointMarkers).toBeVisible({ timeout: 10000 });
   });
@@ -174,7 +174,7 @@ test.describe('BRAPP-49: Fix: AI-generated route save fails due to missing waypo
     // Verify the route appears in the user's route list
     await page.goto('https://ride.borarodar.app/routes');
     
-    // Wait for routes to load
+    // Wait for routes to load - better wait strategy
     await page.waitForSelector('div[data-testid="route-item"]', { timeout: 15000 });
     await page.waitForTimeout(1000);
     
