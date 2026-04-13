@@ -1,119 +1,195 @@
 import { test, expect } from '@playwright/test';
-import { mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync, unlinkSync } from 'fs';
 import path from 'path';
-import JSZip from 'jszip';
 
+const BASE_URL = process.env.STAGING_URL || 'https://ride.borarodar.app';
 const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
 const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
 
-const FIXTURES_DIR = path.join(__dirname, 'fixtures');
-const VALID_KMZ = path.join(FIXTURES_DIR, 'test.kmz');
-const INVALID_KML_KMZ = path.join(FIXTURES_DIR, 'invalid-kml.kmz');
-const LARGE_KMZ = path.join(FIXTURES_DIR, 'large.kmz');
-const INVALID_TXT = path.join(FIXTURES_DIR, 'invalid-file.txt');
-
 test.describe('BRAPP-34: Add KMZ File Processing Support', () => {
-  test.beforeAll(async () => {
+  const LARGE_KMZ_PATH = path.join(__dirname, 'fixtures', 'large-test.kmz');
+
+  test.skip(
+    !LOGIN_EMAIL || !LOGIN_PASSWORD,
+    'LOGIN_EMAIL and LOGIN_PASSWORD environment variables must be set for this suite.',
+  );
+
+  test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
+    mkdirSync('tests/fixtures', { recursive: true });
+    // Generate a 11MB file to test file size validation (AC3)
+    const buffer = Buffer.alloc(11 * 1024 * 1024);
+    writeFileSync(LARGE_KMZ_PATH, buffer);
+  });
 
-    // Build invalid-kml.kmz from invalid.kml (no valid route geometry)
-    const invalidKmlContent = readFileSync(path.join(FIXTURES_DIR, 'invalid.kml'));
-    const zipInvalid = new JSZip();
-    zipInvalid.file('doc.kml', invalidKmlContent);
-    const invalidKmzBuffer = await zipInvalid.generateAsync({ type: 'nodebuffer' });
-    writeFileSync(INVALID_KML_KMZ, invalidKmzBuffer);
-
-    // Build large.kmz (>10 MB, stored uncompressed to guarantee size)
-    const zipLarge = new JSZip();
-    zipLarge.file('padding.bin', Buffer.alloc(11 * 1024 * 1024), { compression: 'STORE' });
-    const largeKmzBuffer = await zipLarge.generateAsync({ type: 'nodebuffer' });
-    writeFileSync(LARGE_KMZ, largeKmzBuffer);
-
-    // Create invalid-file.txt
-    writeFileSync(INVALID_TXT, 'This is not a valid KMZ or GPX file.');
+  test.afterAll(() => {
+    if (require('fs').existsSync(LARGE_KMZ_PATH)) {
+      unlinkSync(LARGE_KMZ_PATH);
+    }
   });
 
   test.beforeEach(async ({ page }) => {
-    test.skip(
-      !LOGIN_EMAIL || !LOGIN_PASSWORD,
-      'LOGIN_EMAIL and LOGIN_PASSWORD environment variables are required for login-dependent tests.',
+    // Login flow
+    await page.goto(BASE_URL);
+    await page.waitForSelector(
+      'input[type="email"], input[name="email"], input[placeholder="Email"]',
+      { timeout: 15000 },
     );
+    await page.fill(
+      'input[type="email"], input[name="email"], input[placeholder="Email"]',
+      LOGIN_EMAIL!,
+    );
+    await page.fill(
+      'input[type="password"], input[name="password"], input[placeholder="Senha"], input[placeholder="Password"]',
+      LOGIN_PASSWORD!,
+    );
+    await page.click('button[type="submit"]');
+    await page.waitForURL(
+      (url) => !/\/(login|signin|auth)(\/|$)/i.test(url.pathname),
+      { timeout: 15000 },
+    );
+    await expect(
+      page.locator('input[type="email"], input[name="email"]'),
+    ).not.toBeVisible({ timeout: 15000 });
+  });
 
-    await page.goto('/');
-
-    await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL!);
-    await page.fill('input[name="password"], input[type="password"]', LOGIN_PASSWORD!);
-    await page.click('button[type="submit"], button:has-text("Login")');
-
-    // Wait for dashboard/home to load
+  // AC1: User uploads a valid .kmz file on the route detection page → municipalities along the route are detected and displayed in the results list, matching the behavior of an equivalent .gpx upload
+  test('AC1: User uploads a valid .kmz file on the route detection page → municipalities along the route are detected and displayed in the results list, matching the behavior of an equivalent .gpx upload', async ({ page }) => {
+    // Navigate to the route detection page
+    await page.goto(`${BASE_URL}/municipalities/detect`);
     await page.waitForLoadState('networkidle');
-  });
-
-  test('AC1: User uploads a valid .kmz file via the file upload interface → the system displays the successfully detected route or a confirmation of successful processing.', async ({ page }) => {
-    // Navigate to route creation/upload
-    await page.click('[aria-label="Upload Route"]');
-    await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-
-    await page.locator('input[type="file"]').setInputFiles(VALID_KMZ);
-
-    // Wait for processing to complete
-    await page.waitForSelector('.success-message, .route-detected', { timeout: 30000 });
-
+    
     await page.screenshot({ path: 'screenshots/BRAPP-34-ac-1.png', fullPage: true });
-
-    // Verify success message or route detection
-    const successMessage = page.locator('.success-message, .route-detected');
-    await expect(successMessage).toBeVisible();
+    
+    // Find the file upload input
+    const fileInput = page.locator('input[type="file"]');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
+    
+    // Upload a test KMZ file from existing fixtures
+    await fileInput.setInputFiles('tests/fixtures/test.kmz');
+    
+    // Wait for upload processing and results to appear
+    await page.waitForSelector('[data-testid="municipalities-list"], [data-testid="municipality-item"], .municipalities-list, .municipality-item', { timeout: 30000 });
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-1-results.png', fullPage: true });
+    
+    // Verify that municipalities are detected and displayed
+    const municipalityItems = page.locator('[data-testid="municipality-item"], .municipality-item');
+    
+    // Wait for municipalities to be visible
+    await expect(municipalityItems).toBeVisible({ timeout: 10000 });
+    
+    // Get the count of items
+    const itemCount = await municipalityItems.count();
+    expect(itemCount).toBeGreaterThan(0);
   });
 
-  test('AC2: User uploads a .kmz file that contains no valid KML geometry → the system displays an error message containing the text \'KMZ file contains no valid KML geometry\'.', async ({ page }) => {
-    // Navigate to route creation/upload
-    await page.click('[aria-label="Upload Route"]');
-    await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-
-    await page.locator('input[type="file"]').setInputFiles(INVALID_KML_KMZ);
-
-    // Wait for error message
-    await page.waitForSelector('.error-message', { timeout: 10000 });
-
+  // AC2: User uploads a corrupt or empty .kmz file → an error message containing 'KMZ file contains no valid KML geometry' is displayed and no route is created
+  test('AC2: User uploads a corrupt or empty .kmz file → an error message containing \'KMZ file contains no valid KML geometry\' is displayed and no route is created', async ({ page }) => {
+    // Navigate to the route detection page
+    await page.goto(`${BASE_URL}/municipalities/detect`);
+    await page.waitForLoadState('networkidle');
+    
     await page.screenshot({ path: 'screenshots/BRAPP-34-ac-2.png', fullPage: true });
-
-    // Verify error message contains required text
-    const errorMsg = page.locator('.error-message');
-    await expect(errorMsg).toContainText('KMZ file contains no valid KML geometry');
+    
+    // Find the file upload input
+    const fileInput = page.locator('input[type="file"]');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
+    
+    // Upload a corrupt KMZ file using an in-memory payload
+    await fileInput.setInputFiles({
+      name: 'corrupt.kmz',
+      mimeType: 'application/vnd.google-earth.kmz',
+      buffer: Buffer.from('this is not a valid kmz archive'),
+    });
+    
+    // Wait for error message to appear
+    await page.waitForSelector('[data-testid="error-message"], .error-message, .alert, .alert-danger, [data-testid="validation-error"]', { timeout: 15000 });
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-2-error.png', fullPage: true });
+    
+    // Get error message text and verify it contains expected content
+    const errorMessage = await page.locator('[data-testid="error-message"], .error-message, .alert, .alert-danger, [data-testid="validation-error"]').textContent();
+    expect(errorMessage).toContain('KMZ file contains no valid KML geometry');
   });
 
-  test('AC3: User uploads a .kmz file larger than 10MB → the system displays an error message indicating the file size limit has been exceeded.', async ({ page }) => {
-    // Navigate to route creation/upload
-    await page.click('[aria-label="Upload Route"]');
-    await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-
-    await page.locator('input[type="file"]').setInputFiles(LARGE_KMZ);
-
-    // Wait for error message
-    await page.waitForSelector('.error-message', { timeout: 10000 });
-
+  // AC3: User uploads a .kmz file larger than 10 MB → the upload is rejected and a file-size validation error is visible before any processing occurs
+  test('AC3: User uploads a .kmz file larger than 10 MB → the upload is rejected and a file-size validation error is visible before any processing occurs', async ({ page }) => {
+    // Navigate to the route detection page
+    await page.goto(`${BASE_URL}/municipalities/detect`);
+    await page.waitForLoadState('networkidle');
+    
     await page.screenshot({ path: 'screenshots/BRAPP-34-ac-3.png', fullPage: true });
-
-    // Verify file size error message
-    const errorMsg = page.locator('.error-message');
-    await expect(errorMsg).toContainText('file size limit has been exceeded');
+    
+    // Find the file upload input
+    const fileInput = page.locator('input[type="file"]');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
+    
+    // Try to upload a large file generated in beforeAll
+    await fileInput.setInputFiles(LARGE_KMZ_PATH);
+    
+    // Wait for file size validation error
+    await page.waitForSelector('[data-testid="file-size-error"], .error-message, .alert-danger, .alert, [data-testid="validation-error"]', { timeout: 15000 });
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-3-file-size-error.png', fullPage: true });
+    
+    // Get error message text and verify it contains expected content
+    const fileSizeError = await page.locator('[data-testid="file-size-error"], .error-message, .alert-danger, .alert, [data-testid="validation-error"]').textContent();
+    expect(fileSizeError).toContain('file size exceeds the 10 MB limit');
   });
 
-  test('AC4: User attempts to upload a non-KMZ/non-GPX file type (e.g., a .txt file) → the system displays an error message indicating an unsupported file format.', async ({ page }) => {
-    // Navigate to route creation/upload
-    await page.click('[aria-label="Upload Route"]');
-    await page.waitForSelector('input[type="file"]', { timeout: 10000 });
-
-    await page.locator('input[type="file"]').setInputFiles(INVALID_TXT);
-
-    // Wait for error message
-    await page.waitForSelector('.error-message', { timeout: 10000 });
-
+  // AC4: User opens the file upload dialog → the file picker accepts .kmz files in addition to .gpx files (both extensions are selectable)
+  test('AC4: User opens the file upload dialog → the file picker accepts .kmz files in addition to .gpx files (both extensions are selectable)', async ({ page }) => {
+    // Navigate to the route detection page
+    await page.goto(`${BASE_URL}/municipalities/detect`);
+    await page.waitForLoadState('networkidle');
+    
     await page.screenshot({ path: 'screenshots/BRAPP-34-ac-4.png', fullPage: true });
+    
+    // Find the file upload input
+    const fileInput = page.locator('input[type="file"]');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
+    
+    // Assert that the accept attribute contains both extensions
+    await expect(fileInput).toHaveAttribute('accept', /(?:^|,)\s*\.gpx\s*(?:,|$)/);
+    await expect(fileInput).toHaveAttribute('accept', /(?:^|,)\s*\.kmz\s*(?:,|$)/);
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-4-accept-attribute.png', fullPage: true });
+  });
 
-    // Verify unsupported file format error message
-    const errorMsg = page.locator('.error-message');
-    await expect(errorMsg).toContainText('unsupported file format');
+  // AC5: User uploads a valid .kmz file and navigates to the route detail page → the uploaded file is stored and the route geometry renders correctly on the map
+  test('AC5: User uploads a valid .kmz file and navigates to the route detail page → the uploaded file is stored and the route geometry renders correctly on the map', async ({ page }) => {
+    // Navigate to the route detection page
+    await page.goto(`${BASE_URL}/municipalities/detect`);
+    await page.waitForLoadState('networkidle');
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-5.png', fullPage: true });
+    
+    // Find the file upload input
+    const fileInput = page.locator('input[type="file"]');
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
+    
+    // Upload a test KMZ file from existing fixtures
+    await fileInput.setInputFiles('tests/fixtures/test.kmz');
+    
+    // Wait for upload processing and results to appear
+    await page.waitForSelector('[data-testid="municipalities-list"], [data-testid="municipality-item"], .municipalities-list, .municipality-item', { timeout: 30000 });
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-5-results.png', fullPage: true });
+    
+    // Click on one of the detected municipalities to view the details
+    const firstResult = page.locator('[data-testid="municipality-item"], .municipality-item').first();
+    await expect(firstResult).toBeVisible({ timeout: 10000 });
+    
+    await firstResult.click();
+    
+    // Wait for route details page to load - using improved URL regex
+    await page.waitForURL(/\/municipalities\/[^/]+\/route\/.*/, { timeout: 15000 });
+    
+    await page.screenshot({ path: 'screenshots/BRAPP-34-ac-5-detail-loaded.png', fullPage: true });
+    
+    // Verify route details page contains map with uploaded KMZ geometry
+    const mapElement = page.locator('[data-testid="map"], .map-container, #map');
+    await expect(mapElement).toBeVisible({ timeout: 10000 });
   });
 });
