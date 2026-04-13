@@ -21,7 +21,7 @@ test.describe('BRAPP-26: Bug Fix: Destination City Dropdown Not Listing Cities i
     await destinationField.fill('São');
     
     // Wait for dropdown to appear with cities (with timeout)
-    await page.waitForSelector('div[role="listbox"]', { timeout: 10000 });
+    await page.waitForSelector('div[role="listbox"]', { timeout: 5000 });
     
     // Take screenshot
     await page.screenshot({ path: 'screenshots/BRAPP-26-ac-1.png', fullPage: true });
@@ -43,7 +43,7 @@ test.describe('BRAPP-26: Bug Fix: Destination City Dropdown Not Listing Cities i
     await originField.fill('Rio');
     
     // Wait for dropdown to appear with cities (with timeout)
-    await page.waitForSelector('div[role="listbox"]', { timeout: 10000 });
+    await page.waitForSelector('div[role="listbox"]', { timeout: 5000 });
     
     // Take screenshot
     await page.screenshot({ path: 'screenshots/BRAPP-26-ac-2.png', fullPage: true });
@@ -65,7 +65,7 @@ test.describe('BRAPP-26: Bug Fix: Destination City Dropdown Not Listing Cities i
     await destinationField.fill('São');
     
     // Wait for dropdown to appear with cities (with timeout)
-    await page.waitForSelector('div[role="listbox"]', { timeout: 10000 });
+    await page.waitForSelector('div[role="listbox"]', { timeout: 5000 });
     
     // Get the first city name before selecting it to validate it's populated correctly
     const firstCityElement = page.getByRole('option').first();
@@ -75,7 +75,7 @@ test.describe('BRAPP-26: Bug Fix: Destination City Dropdown Not Listing Cities i
     await firstCityElement.click();
     
     // Verify that dropdown is closed and input is populated (with timeout)
-    await page.waitForSelector('div[role="listbox"]', { state: 'hidden', timeout: 10000 });
+    await page.waitForSelector('div[role="listbox"]', { state: 'hidden', timeout: 5000 });
     
     // Take screenshot
     await page.screenshot({ path: 'screenshots/BRAPP-26-ac-3.png', fullPage: true });
@@ -97,7 +97,7 @@ test.describe('BRAPP-26: Bug Fix: Destination City Dropdown Not Listing Cities i
     await destinationField.fill('qwerasdf');
     
     // Wait for dropdown to appear or to be populated (with timeout)
-    await page.waitForSelector('div[role="listbox"]', { timeout: 10000 });
+    await page.waitForSelector('div[role="listbox"]', { timeout: 5000 });
     
     // Take screenshot
     await page.screenshot({ path: 'screenshots/BRAPP-26-ac-4.png', fullPage: true });
@@ -120,7 +120,7 @@ test.describe('BRAPP-26: Bug Fix: Destination City Dropdown Not Listing Cities i
     await destinationField.fill('São');
     
     // Wait for dropdown to appear with cities (with timeout)
-    await page.waitForSelector('div[role="listbox"]', { timeout: 10000 });
+    await page.waitForSelector('div[role="listbox"]', { timeout: 5000 });
     
     // Take screenshot
     await page.screenshot({ path: 'screenshots/BRAPP-26-ac-5.png', fullPage: true });
