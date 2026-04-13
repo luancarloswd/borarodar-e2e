@@ -52,7 +52,7 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac1-motorcycle-detail.png' });
 
     // The fuel history section must always be rendered
-    // Using a more robust selector to find the section
+    // Locate the section by its visible heading text
     const fuelSection = page.locator('text=Histórico de abastecimentos');
     await expect(fuelSection).toBeVisible({ timeout: 15000 });
 
@@ -73,14 +73,20 @@ test.describe('BRAPP-54: Fix Gas Supplies Not Listed on Motorcycle Page', () => 
 
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-54-ac2-empty-or-list.png' });
 
-    // Check if the empty state is visible or if there's content
     const emptyState = page.locator('text=Nenhum abastecimento registrado');
     const tableRows = page.locator('table tbody tr');
-    
-    // Wait for either the empty state or table rows to be visible
-    await expect(page.locator('text=Nenhum abastecimento registrado')).toBeVisible({ timeout: 10000 });
-    
-    // Validate that the section exists and is correctly rendered
+
+    // Wait for either the empty state or table rows to appear
+    await expect(emptyState.or(tableRows.first())).toBeVisible({ timeout: 10000 });
+
+    // Assert the mutually exclusive state based on which one is visible
+    if (await tableRows.first().isVisible()) {
+      await expect(emptyState).not.toBeVisible();
+    } else {
+      await expect(tableRows).toHaveCount(0);
+    }
+
+    // Validate that the section heading is correctly rendered
     await expect(page.locator('text=Histórico de abastecimentos')).toBeVisible({ timeout: 10000 });
   });
 
