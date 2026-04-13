@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
+import path from 'path';
 
 test.describe('BRAPP-61: Fix 500 Error When Uploading Visit Proof Photo', () => {
   test.beforeAll(() => {
