@@ -8,14 +8,16 @@ test.describe('BRAPP-50: Feature: Route Deep Links for Google Maps and Waze', ()
     await page.locator('input[type="email"]').fill('test@borarodar.app');
     await page.locator('input[type="password"]').fill('borarodarapp');
     await page.locator('button[type="submit"]').click();
-    // Wait for navigation to dashboard
-    await page.waitForLoadState('networkidle');
+    // Wait for navigation to dashboard with explicit timeout
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
   });
 
   test('AC1: User navigates to a route detail page → deep link buttons for Google Maps and Waze are visible on the page', async ({ page }) => {
     // Navigate to a route detail page
     await page.locator('[data-testid="route-list"]').first().click();
-    await page.waitForTimeout(2000);
+    // Wait for route detail page to load properly
+    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     
     // Take screenshot
     await page.screenshot({ path: 'BRAPP-50-ac-1.png', fullPage: true });
@@ -31,7 +33,9 @@ test.describe('BRAPP-50: Feature: Route Deep Links for Google Maps and Waze', ()
   test('AC2: User clicks the Google Maps deep link button → Google Maps opens with the correct route origin and destination pre-filled', async ({ page }) => {
     // Navigate to a route detail page
     await page.locator('[data-testid="route-list"]').first().click();
-    await page.waitForTimeout(2000);
+    // Wait for route detail page to load properly
+    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     
     // Click Google Maps button
     await page.locator('[data-testid="google-maps-link"]').click();
@@ -47,7 +51,9 @@ test.describe('BRAPP-50: Feature: Route Deep Links for Google Maps and Waze', ()
   test('AC3: User clicks the Waze deep link button → Waze opens with the correct route destination pre-filled for navigation', async ({ page }) => {
     // Navigate to a route detail page
     await page.locator('[data-testid="route-list"]').first().click();
-    await page.waitForTimeout(2000);
+    // Wait for route detail page to load properly
+    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     
     // Click Waze button
     await page.locator('[data-testid="waze-link"]').click();
@@ -63,7 +69,9 @@ test.describe('BRAPP-50: Feature: Route Deep Links for Google Maps and Waze', ()
   test('AC4: User views a route with multiple waypoints → the Google Maps deep link includes all waypoints in the correct order', async ({ page }) => {
     // Navigate to a route detail page with multiple waypoints
     await page.locator('[data-testid="route-list"]').first().click();
-    await page.waitForTimeout(2000);
+    // Wait for route detail page to load properly
+    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     
     // Take screenshot
     await page.screenshot({ path: 'BRAPP-50-ac-4.png', fullPage: true });
@@ -81,7 +89,9 @@ test.describe('BRAPP-50: Feature: Route Deep Links for Google Maps and Waze', ()
     
     // Navigate to a route detail page
     await page.locator('[data-testid="route-list"]').first().click();
-    await page.waitForTimeout(2000);
+    // Wait for route detail page to load properly
+    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     
     // Take screenshot
     await page.screenshot({ path: 'BRAPP-50-ac-5.png', fullPage: true });
