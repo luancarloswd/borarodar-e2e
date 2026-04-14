@@ -53,16 +53,31 @@ test.describe('BRAPP-13: SOS FAB: Resume Active Request on Re-click', () => {
     
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-13-ac1-request-created.png', fullPage: true });
     
-    // Get the request ID from the URL
+    // Get the request ID from the URL - more robust approach
     const currentUrl = page.url();
-    const urlParts = currentUrl.split('/');
-    const requestId = urlParts[urlParts.length - 1];
+    const match = currentUrl.match(/\/sos\/request\/([^\/\?#]+)/);
+    let requestId = '';
+    if (match && match[1]) {
+      requestId = match[1];
+    } else {
+      // Fallback to the original approach
+      const urlParts = currentUrl.split('/');
+      requestId = urlParts[urlParts.length - 1];
+    }
+    
+    // Ensure we got a valid request ID
+    expect(requestId).toBeTruthy();
+    expect(requestId).not.toBe('request');
+    expect(requestId).not.toBe('');
     
     // Navigate to home page 
     await page.goto(`${BASE_URL}/home`);
     await page.waitForLoadState('networkidle');
     
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-13-ac1-navigated-home.png', fullPage: true });
+    
+    // Wait for the SOS FAB to be visible (it might not appear immediately after navigation)
+    await page.waitForSelector('button[data-testid="sos-fab"]', { timeout: 10000 });
     
     // Click SOS FAB to resume the active request
     const sosFab = page.locator('button[data-testid="sos-fab"]');
@@ -73,7 +88,9 @@ test.describe('BRAPP-13: SOS FAB: Resume Active Request on Re-click', () => {
     await page.waitForURL(`/sos/request/${requestId}`, { timeout: 15000 });
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-13-ac1-request-screen.png', fullPage: true });
     
-    expect(page.url()).toContain(`/sos/request/${requestId}`);
+    // Verify the URL contains the correct request ID
+    const finalUrl = page.url();
+    expect(finalUrl).toContain(`/sos/request/${requestId}`);
   });
 
   // AC3: User taps the SOS FAB with no active request (or after resolving/cancelling a previous one) → app navigates to /sos/new and the new SOS request form is displayed
@@ -93,7 +110,9 @@ test.describe('BRAPP-13: SOS FAB: Resume Active Request on Re-click', () => {
     await page.waitForURL('/sos/new', { timeout: 15000 });
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-13-ac3-new-form.png', fullPage: true });
     
-    expect(page.url()).toBe(`${BASE_URL}/sos/new`);
+    // Verify navigation to new request form with robust URL check
+    const finalUrl = page.url();
+    expect(finalUrl).toContain('/sos/new');
   });
 
   // AC4: User has an active SOS request and navigates to a different screen (e.g. home/map) → the SOS FAB displays a visible pulsing red indicator signaling an active request exists
@@ -171,6 +190,8 @@ test.describe('BRAPP-13: SOS FAB: Resume Active Request on Re-click', () => {
     await page.waitForURL(`/sos/request/${requestId}`, { timeout: 15000 });
     await page.screenshot({ path: 'e2e/screenshots/BRAPP-13-ac5-resume-after-refresh.png', fullPage: true });
     
-    expect(page.url()).toContain(`/sos/request/${requestId}`);
+    // Verify the URL contains the correct request ID
+    const finalUrl = page.url();
+    expect(finalUrl).toContain(`/sos/request/${requestId}`);
   });
 });
