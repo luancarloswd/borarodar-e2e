@@ -9,11 +9,11 @@ test.describe('BRAPP-67: Fix Capacitor Build Pipeline Failing Due to Node.js Ver
   test.beforeEach(async ({ page }) => {
     // Login flow to the application
     await page.goto('https://ride.borarodar.app');
-    await page.waitForSelector('input[type="email"]');
+    await page.waitForSelector('input[type="email"]', { timeout: 10000 });
     await page.fill('input[type="email"]', 'test@borarodar.app');
     await page.fill('input[type="password"]', 'borarodarapp');
     await page.click('button[type="submit"]');
-    await page.waitForSelector('[data-testid="dashboard"]');
+    await page.waitForSelector('[data-testid="dashboard"]', { timeout: 10000 });
   });
 
   test('AC1: User triggers the Android build workflow via GitHub Actions workflow_dispatch → the workflow run page shows a green checkmark with no \'Capacitor CLI requires NodeJS >=22.0.0\' error in the logs and APK/AAB artifacts appear in the Artifacts section', async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe('BRAPP-67: Fix Capacitor Build Pipeline Failing Due to Node.js Ver
     await page.screenshot({ path: 'screenshots/BRAPP-67-ac-1.png', fullPage: true });
     
     // Verify that we can navigate to the workflow page (basic browser test)
-    await page.waitForSelector('body');
+    await page.waitForSelector('body', { timeout: 10000 });
     
     // Check that the URL is correct
     expect(page.url()).toContain('build-android.yml');
@@ -42,7 +42,7 @@ test.describe('BRAPP-67: Fix Capacitor Build Pipeline Failing Due to Node.js Ver
     await page.screenshot({ path: 'screenshots/BRAPP-67-ac-2.png', fullPage: true });
     
     // Verify that we can navigate to the workflow page (basic browser test)
-    await page.waitForSelector('body');
+    await page.waitForSelector('body', { timeout: 10000 });
     
     // Check that the URL is correct  
     expect(page.url()).toContain('build-ios.yml');
@@ -60,7 +60,7 @@ test.describe('BRAPP-67: Fix Capacitor Build Pipeline Failing Due to Node.js Ver
     await page.screenshot({ path: 'screenshots/BRAPP-67-ac-3.png', fullPage: true });
     
     // Verify that we can navigate to the releases page (basic browser test)
-    await page.waitForSelector('body');
+    await page.waitForSelector('body', { timeout: 10000 });
     
     // Check that we're on the releases page
     expect(page.url()).toContain('releases');
@@ -71,13 +71,13 @@ test.describe('BRAPP-67: Fix Capacitor Build Pipeline Failing Due to Node.js Ver
     await page.goto('https://github.com/roda-unai-front/roda-unai-front/actions/runs/1234567890'); // Example workflow URL
     
     // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
     
     // Take screenshot to show log analysis
     await page.screenshot({ path: 'screenshots/BRAPP-67-ac-4.png', fullPage: true });
     
     // Verify successful navigation
-    await page.waitForSelector('body');
+    await page.waitForSelector('body', { timeout: 10000 });
     
     // Check URL is correct
     expect(page.url()).toContain('actions/runs/1234567890');
@@ -88,13 +88,13 @@ test.describe('BRAPP-67: Fix Capacitor Build Pipeline Failing Due to Node.js Ver
     await page.goto('https://github.com/roda-unai-front/roda-unai-front/pull/1234'); // Example PR URL
     
     // Wait for checks to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
     
     // Take screenshot to show checks tab
     await page.screenshot({ path: 'screenshots/BRAPP-67-ac-5.png', fullPage: true });
     
     // Verify successful navigation
-    await page.waitForSelector('body');
+    await page.waitForSelector('body', { timeout: 10000 });
     
     // Check that we're on the PR page
     expect(page.url()).toContain('pull/1234');
