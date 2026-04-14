@@ -2,12 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functional state update', () => {
   let page;
+  const baseURL = process.env.BASE_URL || 'https://ride.borarodar.app';
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     
     // Login flow to the application
-    await page.goto('https://ride.borarodar.app');
+    await page.goto(baseURL);
     await page.waitForSelector('input[type="email"]');
     await page.fill('input[type="email"]', 'test@borarodar.app');
     await page.fill('input[type="password"]', 'borarodarapp');
@@ -23,7 +24,7 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
 
   test('AC1: User navigates to the Route Editor page → the page loads without errors and the route form is fully rendered with all fields visible', async () => {
     // Navigate to Route Editor page
-    await page.goto('https://ride.borarodar.app/route-editor');
+    await page.goto(`${baseURL}/route-editor`);
     
     // Wait for page to load and form elements to be visible
     await page.waitForSelector('[data-testid="route-editor-form"]', { timeout: 15000 });
@@ -46,7 +47,7 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
 
   test('AC2: User adds a new stop to the route → the stop appears in the stops list and the form state updates correctly without console errors', async () => {
     // Navigate to Route Editor page
-    await page.goto('https://ride.borarodar.app/route-editor');
+    await page.goto(`${baseURL}/route-editor`);
     
     // Wait for page to load
     await page.waitForSelector('[data-testid="route-editor-form"]', { timeout: 15000 });
@@ -67,7 +68,7 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
 
   test('AC3: User removes a stop from the route → the stop is removed from the list and remaining stops are displayed correctly', async () => {
     // Navigate to Route Editor page
-    await page.goto('https://ride.borarodar.app/route-editor');
+    await page.goto(`${baseURL}/route-editor`);
     
     // Wait for page to load
     await page.waitForSelector('[data-testid="route-editor-form"]', { timeout: 15000 });
@@ -85,14 +86,14 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
     // Take screenshot for verification
     await page.screenshot({ path: 'BRAPP-42-ac-3.png', fullPage: true });
     
-    // Verify stop was removed (might be zero or more stops remaining)
+    // Verify stop was removed (may be zero stops remaining)
     const stopsCount = await page.$$('[data-testid="stop-item"]');
-    expect(stopsCount.length).toBeGreaterThanOrEqual(0);
+    expect(stopsCount.length).toBe(0);
   });
 
   test('AC4: User edits route details and clicks Save → the form submits successfully and a confirmation message is displayed', async () => {
     // Navigate to Route Editor page
-    await page.goto('https://ride.borarodar.app/route-editor');
+    await page.goto(`${baseURL}/route-editor`);
     
     // Wait for page to load
     await page.waitForSelector('[data-testid="route-editor-form"]', { timeout: 15000 });
@@ -116,7 +117,7 @@ test.describe('BRAPP-42: Fix TypeScript type mismatch in RouteEditorPage functio
 
   test('AC5: User opens the Route Editor with an existing route that has no stops → the page renders correctly with an empty stops list and allows adding new stops', async () => {
     // Navigate to Route Editor page with existing route (empty)
-    await page.goto('https://ride.borarodar.app/route-editor');
+    await page.goto(`${baseURL}/route-editor`);
     
     // Wait for page to load
     await page.waitForSelector('[data-testid="route-editor-form"]', { timeout: 15000 });
