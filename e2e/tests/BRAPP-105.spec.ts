@@ -224,6 +224,7 @@ test.describe("BRAPP-105: Suggest Gas Supply Stations on Route Based on Selected
       return;
     }
 
+    // Switch to a different motorcycle — read current value first so we don't re-select the same one
     const currentValue = await motoPicker.inputValue();
     let altValue: string | null = null;
     for (let i = 0; i < optionCount; i++) {
