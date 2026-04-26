@@ -80,4 +80,3 @@ test.describe('BRAPP-33: Fix KMZ File Import for Routes', () => {
     await page.screenshot({ path: 'screenshots/BRAPP-33-ac-4.png', fullPage: true });
   });
 });
-});

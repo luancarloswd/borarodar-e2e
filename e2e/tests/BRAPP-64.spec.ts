@@ -42,17 +42,14 @@ test.describe('BRAPP-64: "title": "Fix Zero Gas Supply Estimation in Budget Wiza
     // Step 6: Review and generate estimate
     await page.click('button:has-text("Gerar estimativa")');
     await page.waitForLoadState('networkidle', { timeout: 30000 });
-    await page.waitForSelector('text=Combustível', { timeout: 30000 });
+    
+    const fuelLine = page.locator('text=Combustível');
+    await expect(fuelLine).toBeVisible({ timeout: 30000 });
     
     await page.screenshot({ path: 'screenshots/BRAPP-64-ac-1.png', fullPage: true });
     
-    // Wait for the fuel line to be visible and then check its value
-    const fuelLine = await page.waitForSelector('text=Combustível', { timeout: 30000 });
-    await expect(fuelLine).toBeVisible();
-    
     // Get the next sibling element which contains the value
-    const valueElement = fuelLine.nextSibling();
-    const fuelValue = await valueElement.textContent();
+    const fuelValue = await page.locator('text=Combustível + *').textContent();
     expect(fuelValue).not.toContain('R$ 0,00');
   });
 
@@ -103,17 +100,14 @@ test.describe('BRAPP-64: "title": "Fix Zero Gas Supply Estimation in Budget Wiza
     
     await page.click('button:has-text("Gerar estimativa")');
     await page.waitForLoadState('networkidle', { timeout: 30000 }); 
-    await page.waitForSelector('text=Combustível', { timeout: 30000 });
+    
+    const fuelLine = page.locator('text=Combustível');
+    await expect(fuelLine).toBeVisible({ timeout: 30000 });
     
     await page.screenshot({ path: 'screenshots/BRAPP-64-ac-2.png', fullPage: true });
     
-    // Wait for the fuel line to be visible and then check its value
-    const fuelLine = await page.waitForSelector('text=Combustível', { timeout: 30000 });
-    await expect(fuelLine).toBeVisible();
-    
     // Get the next sibling element which contains the value
-    const valueElement = fuelLine.nextSibling();
-    const fuelValue = await valueElement.textContent();
+    const fuelValue = await page.locator('text=Combustível + *').textContent();
     expect(fuelValue).not.toContain('R$ 0,00');
   });
 
@@ -130,12 +124,10 @@ test.describe('BRAPP-64: "title": "Fix Zero Gas Supply Estimation in Budget Wiza
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     
     // Check for validation error
-    await page.waitForSelector('text=Por favor, verifique os campos de entrada', { timeout: 30000 });
+    const errorMessage = page.locator('text=Por favor, verifique os campos de entrada');
+    await expect(errorMessage).toBeVisible({ timeout: 30000 });
     
     await page.screenshot({ path: 'screenshots/BRAPP-64-ac-3.png', fullPage: true });
-    
-    const errorMessage = await page.waitForSelector('text=Por favor, verifique os campos de entrada', { timeout: 30000 });
-    await expect(errorMessage).toBeVisible();
   });
 
   test('AC4: User selects \'Por Distância\' mode in Step 1 and enters 1500 km, then proceeds to Step 6 → \'Combustível\' line item displays a calculated cost instead of R$ 0,00', async ({ page }) => {
@@ -161,17 +153,14 @@ test.describe('BRAPP-64: "title": "Fix Zero Gas Supply Estimation in Budget Wiza
     // Step 6: Review and generate estimate
     await page.click('button:has-text("Gerar estimativa")');
     await page.waitForLoadState('networkidle', { timeout: 30000 }); 
-    await page.waitForSelector('text=Combustível', { timeout: 30000 });
+    
+    const fuelLine = page.locator('text=Combustível');
+    await expect(fuelLine).toBeVisible({ timeout: 30000 });
     
     await page.screenshot({ path: 'screenshots/BRAPP-64-ac-4.png', fullPage: true });
     
-    // Wait for the fuel line to be visible and then check its value
-    const fuelLine = await page.waitForSelector('text=Combustível', { timeout: 30000 });
-    await expect(fuelLine).toBeVisible();
-    
     // Get the next sibling element which contains the value
-    const valueElement = fuelLine.nextSibling();
-    const fuelValue = await valueElement.textContent();
+    const fuelValue = await page.locator('text=Combustível + *').textContent();
     expect(fuelValue).not.toContain('R$ 0,00');
   });
 });

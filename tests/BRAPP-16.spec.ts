@@ -32,7 +32,7 @@ test.describe('BRAPP-16: SDD Message Status Updates', () => {
     
     // Login flow
     await page.getByLabel(/email/i).fill(LOGIN_EMAIL);
-    await page.getByLabel(/password/int).fill(LOGIN_PASSWORD);
+    await page.getByLabel(/password/i).fill(LOGIN_PASSWORD);
     await page.getByRole('button', { name: /login|entrar/i }).click();
     
     // Wait for dashboard/home to load

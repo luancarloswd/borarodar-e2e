@@ -57,8 +57,9 @@ test.describe('BRAPP-83: Unify Routes, Itineraries, and Trips into a Single Hier
       await expect(dayList).toBeVisible();
       
       // Verify each day shows a clickable Route card with start/end cities
-      const routeCards = await page.locator('[data-testid="route-card"]').all();
-      await expect(routeCards).not.toHaveCount(0);
+      const routeCardsLocator = page.locator('[data-testid="route-card"]');
+      await expect(routeCardsLocator).not.toHaveCount(0);
+      const routeCards = await routeCardsLocator.all();
       
       // Check first route card has start/end cities
       if (routeCards.length > 0) {
@@ -191,8 +192,8 @@ test.describe('BRAPP-83: Unify Routes, Itineraries, and Trips into a Single Hier
     const dayList = page.locator('[data-testid="trip-day-list"]');
     await expect(dayList).toBeVisible();
     
-    const routeCards = await page.locator('[data-testid="route-card"]').all();
-    await expect(routeCards).not.toHaveCount(0);
+    const routeCardsLocator = page.locator('[data-testid="route-card"]');
+    await expect(routeCardsLocator).not.toHaveCount(0);
   });
 
   test('AC4: User navigates to /routes/:id for a day-bound Route → a breadcrumb reading \'Trip > Itinerary > Day N\' is visible at the top of the page; for a standalone Route the breadcrumb is absent', async ({ page }) => {
