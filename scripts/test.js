@@ -9,7 +9,12 @@ const args = rawArgs
 
 const result = spawnSync('npx', ['playwright', 'test', ...args], {
   stdio: 'inherit',
-  shell: process.platform === 'win32',
+  shell: true,
 });
 
-process.exit(result.status ?? 0);
+if (result.error) {
+  console.error(result.error);
+  process.exit(1);
+}
+
+process.exit(result.status ?? 1);
