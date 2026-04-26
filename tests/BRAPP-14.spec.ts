@@ -116,6 +116,8 @@ test.describe('BRAPP-14: Auto-Link Gas Supply to Active Ride Transparently', () 
   });
 
   test.beforeEach(async ({ page, context }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await context.grantPermissions(['geolocation'], { origin: BASE_URL! });
     await context.setGeolocation(TEST_GEOLOCATION); // Error here, should be TEST_GEOLOCATION
 

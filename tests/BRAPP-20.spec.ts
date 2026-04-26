@@ -15,6 +15,9 @@ test.describe('BRAPP-20: Fix: Leaderboard must include all registered riders reg
     const email = LOGIN_EMAIL!.trim();
     const password = LOGIN_PASSWORD!.trim();
 
+    test.skip(!email || !password,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
+
     await page.goto('/');
     // Login flow: Look for login form email + password fields, submit button
     // Fill credentials and submit

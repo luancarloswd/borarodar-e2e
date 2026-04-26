@@ -20,6 +20,8 @@ test.describe('BRAPP-8: Fix: Diagnostic button not rendering on motorcycle page'
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await page.goto(BASE_URL);
 
     await page.waitForSelector(

@@ -17,6 +17,9 @@ test.describe('BRAPP-38: Fix field name mismatch: latitude/longitude vs lat/lon 
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!E2E_EMAIL || !E2E_PASSWORD,
+      'Skipping: set E2E_EMAIL and E2E_PASSWORD to run E2E tests');
+
     await page.goto('/');
     // Login flow
     await page.fill('input[name="email"], input[type="email"]', E2E_EMAIL!);

@@ -16,8 +16,10 @@ test.describe('BRAPP-9: Consolidate Run Button & Fix endLocation Timestamp Valid
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await page.goto(BASE_URL || 'https://ride.borarodar.app');
-    
+
     // Login flow
     if (LOGIN_EMAIL && LOGIN_PASSWORD) {
       await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL);

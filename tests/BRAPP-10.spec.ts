@@ -84,6 +84,8 @@ test.describe('BRAPP-10: GPS Metadata Extraction from Uploaded Images', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await login(page);
     await page.screenshot({ path: 'screenshots/BRAPP-10-logged-in.png', fullPage: true });
   });

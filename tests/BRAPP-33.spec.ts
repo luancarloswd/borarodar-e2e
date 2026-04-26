@@ -17,6 +17,8 @@ test.describe('BRAPP-33: Fix KMZ File Import for Routes', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await page.goto('/');
 
     // Login flow

@@ -18,6 +18,8 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     // Login flow
     await page.goto('/');
     await page.fill('input[type="email"], input[name="email"]', LOGIN_EMAIL!);

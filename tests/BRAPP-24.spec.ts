@@ -18,6 +18,8 @@ test.describe('BRAPP-24: Route Breaks Within Legs (Out-and-Back Detours)', () =>
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await page.goto(BASE_URL!);
     // Login flow
     await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL!);
