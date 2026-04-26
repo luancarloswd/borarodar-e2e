@@ -28,7 +28,8 @@ test.describe('BRAPP-57: "title": "Add Harley-Davidson Fat Boy Variants to Motor
     
     // Verify all three variants appear in the model dropdown
     const modelOptions = await page.locator('select[name="model"]').evaluate((el) => {
-      return Array.from(el.options).map(option => option.text);
+      const select = el as HTMLSelectElement;
+      return Array.from(select.options).map(option => (option as HTMLOptionElement).text);
     });
     
     expect(modelOptions).toContain('Fat Boy');

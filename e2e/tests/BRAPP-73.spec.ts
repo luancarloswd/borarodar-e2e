@@ -41,7 +41,7 @@ test.describe('BRAPP-73: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify SOS button is not visible
     const sosButton = page.locator('[aria-label="PRECISO DE AJUDA"]');
     await expect(sosButton).not.toBeVisible();
-  }, 30000);
+  });
 
   test('AC2: User views the route detail page → the map and route information cards are rendered correctly without any layout shifts or empty spaces where the button was located.', async ({ page }) => {
     // Navigate to a route detail page
@@ -60,7 +60,7 @@ test.describe('BRAPP-73: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify route info cards are visible
     const routeInfoCards = page.locator('[data-testid="route-info-card"]');
     await expect(routeInfoCards).toBeVisible();
-  }, 30000);
+  });
 
   test('AC3: User interacts with the route detail page → all existing navigation links, waypoint lists, and map controls remain functional and visible.', async ({ page }) => {
     // Navigate to a route detail page
@@ -83,7 +83,7 @@ test.describe('BRAPP-73: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify map controls are visible
     const mapControls = page.locator('[data-testid="map-controls"]');
     await expect(mapControls).toBeVisible();
-  }, 30000);
+  });
 
   test('AC4: User navigates between different route pages → the \'PRECISO DE AJUDA\' SOS button is consistently absent across all route-related views.', async ({ page }) => {
     // Navigate to first route detail page
@@ -111,5 +111,5 @@ test.describe('BRAPP-73: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify SOS button is not visible on second page
     const sosButton2 = page.locator('[aria-label="PRECISO DE AJUDA"]');
     await expect(sosButton2).not.toBeVisible();
-  }, 30000);
+  });
 });

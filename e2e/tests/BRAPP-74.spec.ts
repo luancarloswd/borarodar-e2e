@@ -41,7 +41,7 @@ test.describe('BRAPP-74: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify SOS button is not visible
     const sosButton = page.locator('[aria-label="PRECISO DE AJUDA"]');
     await expect(sosButton).not.toBeVisible();
-  }, 30000);
+  });
 
   test('AC2: User navigates to a route detail page → the map component, route info cards, waypoint list, and navigation links render correctly with no blank spaces or layout shifts where the SOS button previously appeared', async ({ page }) => {
     // Navigate to a route detail page
@@ -65,7 +65,7 @@ test.describe('BRAPP-74: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     
     const navigationLinks = page.locator('[data-testid="navigation-links"]');
     await expect(navigationLinks).toBeVisible();
-  }, 30000);
+  });
 
   test('AC3: User navigates to multiple different route detail pages → none of them display the SOS button or any emergency-related modal', async ({ page }) => {
     // Navigate to first route detail page
@@ -93,7 +93,7 @@ test.describe('BRAPP-74: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify SOS button is not visible on second page
     const sosButton2 = page.locator('[aria-label="PRECISO DE AJUDA"]');
     await expect(sosButton2).not.toBeVisible();
-  }, 30000);
+  });
 
   test('AC4: User inspects the route detail page → no EmergencyTypeModal dialog or emergency-related UI elements are present in the DOM', async ({ page }) => {
     // Navigate to a route detail page
@@ -112,7 +112,7 @@ test.describe('BRAPP-74: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     // Verify no other emergency-related elements
     const emergencyElements = page.locator('[class*="emergency"], [data-testid*="emergency"]');
     await expect(emergencyElements).not.toBeVisible();
-  }, 30000);
+  });
 
   test('AC5: User triggers a production build of the application → the build completes successfully with no compilation errors or lint warnings related to emergency imports', async ({ page }) => {
     // Navigate to a route detail page
@@ -130,5 +130,5 @@ test.describe('BRAPP-74: Remove Non-Functional PRECISO DE AJUDA SOS Button from 
     expect(pageContent).not.toContain('emergencyService');
     expect(pageContent).not.toContain('EmergencyTypeModal');
     expect(pageContent).not.toContain('createAssistanceRequest');
-  }, 30000);
+  });
 });
