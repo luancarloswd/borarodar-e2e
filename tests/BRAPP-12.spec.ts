@@ -42,25 +42,25 @@ test.describe('BRAPP-12: Fix menu overlap on camera scan button in mobile gas su
 
   test('AC1: User navigates to the fuel supply registration form on a mobile device -> \'Ler visor da bomba\' button is fully visible and clickable.', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    
+
     // Using known route/UI affordances as suggested
-    await page.click('[data-testid="moto-card"], .moto-card').catch(() => {}); 
+    await page.click('[data-testid="moto-card"], .moto-card').catch(() => {});
     await page.click('[data-testid="add-fuel-btn"], .add-fuel-btn').catch(() => {});
-    
+
     const btnVisor = page.locator('[data-testid="scan-pump-btn"], text=Ler visor da bomba').first();
     await expect(btnVisor).toBeVisible({ timeout: 5000 }).catch(() => console.warn('Button not visible, skipping assertion for AC1'));
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-12-ac-1.png', fullPage: true });
   });
 
   test('AC2: User navigates to the fuel supply registration form on a mobile device -> \'Ler cupom fiscal\' button is fully visible and clickable.', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.click('[data-testid="moto-card"], .moto-card').catch(() => {}); 
+    await page.click('[data-testid="moto-card"], .moto-card').catch(() => {});
     await page.click('[data-testid="add-fuel-btn"], .add-fuel-btn').catch(() => {});
-    
+
     const btnCupom = page.locator('[data-testid="scan-receipt-btn"], text=Ler cupom fiscal').first();
     await expect(btnCupom).toBeVisible({ timeout: 5000 }).catch(() => console.warn('Button not visible, skipping assertion for AC2'));
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-12-ac-2.png', fullPage: true });
   });
 
@@ -68,16 +68,16 @@ test.describe('BRAPP-12: Fix menu overlap on camera scan button in mobile gas su
     await page.setViewportSize({ width: 375, height: 667 });
     await page.click('[data-testid="moto-card"], .moto-card').catch(() => {});
     await page.click('[data-testid="add-fuel-btn"], .add-fuel-btn').catch(() => {});
-    
+
     // Scroll the modal container if it exists
     const modal = page.locator('.overflow-y-auto, .modal-body').first();
     if (await modal.isVisible()) {
         await modal.evaluate((el: any) => el.scrollTop = el.scrollHeight);
     }
-    
+
     const btnVisor = page.locator('[data-testid="scan-pump-btn"], text=Ler visor da bomba').first();
     await expect(btnVisor).toBeVisible({ timeout: 5000 }).catch(() => console.warn('Button not visible, skipping assertion for AC3'));
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-12-ac-3.png', fullPage: true });
   });
 
@@ -85,15 +85,15 @@ test.describe('BRAPP-12: Fix menu overlap on camera scan button in mobile gas su
     await page.setViewportSize({ width: 375, height: 667 });
     await page.click('[data-testid="moto-card"], .moto-card').catch(() => {});
     await page.click('[data-testid="add-fuel-btn"], .add-fuel-btn').catch(() => {});
-    
-    const modal = page.locator('.overflow-y-auto, .modal-body').first();
+
+    const modal = page.locator('.overflow-y-au, .modal-body').first();
     if (await modal.isVisible()) {
         await modal.evaluate((el: any) => el.scrollTop = el.scrollHeight);
     }
-    
+
     const btnCupom = page.locator('[data-testid="scan-receipt-btn"], text=Ler cupom fiscal').first();
     await expect(btnCupom).toBeVisible({ timeout: 5000 }).catch(() => console.warn('Button not visible, skipping assertion for AC4'));
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-12-ac-4.png', fullPage: true });
   });
 });

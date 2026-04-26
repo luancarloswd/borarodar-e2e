@@ -38,7 +38,7 @@ test.describe('BRAPP-16: SDD Message Status Updates', () => {
 
   test('User clicks the "Approve" button on a previously sent SDD message after the bot has restarted -> The SDD message updates to indicate successful approval.', async ({ page }) => {
     const approveButton = page.getByRole('button', { name: /approve|aprovar/i });
-    
+
     await expect(approveButton).toBeVisible({ timeout: 10000 });
     await expect(approveButton).toBeEnabled();
     await approveButton.click();
@@ -49,7 +49,7 @@ test.describe('BRAPP-16: SDD Message Status Updates', () => {
 
   test('User clicks the "Edit" button on a previously sent SDD message after the bot has restarted -> The bot sends a follow-up message prompting for updated SDD details.', async ({ page }) => {
     const editButton = page.getByRole('button', { name: /edit|editar/i });
-    
+
     await expect(editButton).toBeVisible({ timeout: 10000 });
     await expect(editButton).toBeEnabled();
     await editButton.click();
@@ -60,7 +60,7 @@ test.describe('BRAPP-16: SDD Message Status Updates', () => {
 
   test('User clicks the "Cancel" button on a previously sent SDD message after the bot has restarted -> The SDD message updates to indicate cancellation.', async ({ page }) => {
     const cancelButton = page.getByRole('button', { name: /cancel|cancelar/i });
-    
+
     await expect(cancelButton).toBeVisible({ timeout: 10000 });
     await expect(cancelButton).toBeEnabled();
     await cancelButton.click();

@@ -37,21 +37,21 @@ test.describe('BRAPP-9: Consolidate Run Button & Fix endLocation Timestamp Valid
 
     // Count visible run buttons
     const visibleRunButtonsCount = await runButtons.count();
-    
+
     expect(visibleRunButtonsCount).toBe(1);
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-9-ac-1.png', fullPage: true });
   });
 
   test('AC2: User clicks the "Run" button/icon -> the unified ride-start page is displayed.', async ({ page }) => {
     const runButton = page.locator('button:has-text("Run"), button:has-text("Iniciar"), .run-button, .nav-run-icon').first();
-    
+
     await runButton.click();
-    
+
     // Verify we are on the unified ride-start page (checking for a unique element or URL)
     await expect(page).toHaveURL(/.*ride-start|.*inicio|.*start/);
-    await page.waitForSelector('h1, h2', { state: 'visible' }); 
-    
+    await page.waitForSelector('h1, h2', { state: 'visible' });
+
     await page.screenshot({ path: 'screenshots/BRAPP-9-ac-2.png', fullPage: true });
   });
 
@@ -61,7 +61,7 @@ test.describe('BRAPP-9: Consolidate Run Button & Fix endLocation Timestamp Valid
 
     // Fill in required fields (placeholders as actual field names are unknown)
     await page.fill('input[name="title"], .title-input', 'My Ride');
-    
+
     // Explicitly ensuring end timestamp field is empty/not filled
     const endTimestampField = page.locator('input[name*="end"], .end-timestamp').first();
     if (await endTimestampField.isVisible()) {
