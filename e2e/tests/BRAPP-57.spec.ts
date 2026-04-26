@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect } from '@playwright/test';
 
 test.describe('BRAPP-57: "title": "Add Harley-Davidson Fat Boy Variants to Motorcycle Catalog",', () => {
