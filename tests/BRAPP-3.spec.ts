@@ -72,6 +72,8 @@ test.describe('BRAPP-3: User Profile Logo Image Change ╬ô├ç├╢ Frontend
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await page.goto(BASE_URL!);
 
     await page.waitForSelector(

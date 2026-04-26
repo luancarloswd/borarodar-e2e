@@ -17,6 +17,11 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    const loginEmail = process.env.LOGIN_EMAIL;
+    const loginPassword = process.env.LOGIN_PASSWORD;
+    test.skip(!loginEmail || !loginPassword,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
+
     // Login flow
     await page.goto('/');
 
@@ -25,8 +30,8 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
     await page.waitForSelector('input[name="password"]');
     await page.waitForSelector('button[type="submit"]');
 
-    await page.fill('input[name="email"]', LOGIN_EMAIL!);
-    await page.fill('input[name="password"]', LOGIN_PASSWORD!);
+    await page.fill('input[name="email"]', loginEmail);
+    await page.fill('input[name="password"]', loginPassword);
     await page.click('button[type="submit"]');
 
     // Wait for dashboard/home to load by checking for a known element (e.g., navigation bar)

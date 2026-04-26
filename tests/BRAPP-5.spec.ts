@@ -17,6 +17,8 @@ test.describe('BRAPP-5: Fix text encoding and spurious \'0\' rendering on Novo R
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     const baseUrl = process.env.BASE_URL || '/';
 
     await page.goto(baseUrl);

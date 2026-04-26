@@ -17,6 +17,8 @@ test.describe('BRAPP-40: Import KML in Nova Rota Step 2 to Auto-fill Cities', ()
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await page.goto('/');
     // Login flow
     await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL!);

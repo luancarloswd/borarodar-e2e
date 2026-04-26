@@ -19,6 +19,8 @@ test.describe('BRAPP-17: Fix: Callback Events Not Found When Clicking Approve/Ed
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!LOGIN_EMAIL || !LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
 
     // Login flow
     await page.goto('/');

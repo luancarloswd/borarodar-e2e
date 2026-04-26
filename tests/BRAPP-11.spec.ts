@@ -25,6 +25,8 @@ test.describe('BRAPP-11: Fix: Floating Action Buttons (Ride, SOS, Check-in) Over
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await login(page);
   });
 

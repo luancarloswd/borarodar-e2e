@@ -18,6 +18,8 @@ test.describe('BRAPP-4: event slug routing, fallbacks, and error states', () => 
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     // Login flow
     await page.goto(BASE_URL ?? '/');
     const emailField = page.locator('input[type="email"]');

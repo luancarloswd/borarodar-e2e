@@ -35,6 +35,8 @@ test.describe('BRAPP-12: Fix menu overlap on camera scan button in mobile gas su
   });
 
   test.beforeEach(async ({ page }) => {
+    test.skip(!process.env.LOGIN_EMAIL || !process.env.LOGIN_PASSWORD,
+      'Skipping: set LOGIN_EMAIL and LOGIN_PASSWORD to run E2E tests');
     await login(page);
   });
 
