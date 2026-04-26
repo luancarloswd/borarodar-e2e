@@ -14,7 +14,7 @@ if (!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD) {
 }
 
 
-const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+const FIXTURES_DIR = path.resolve('tests', 'fixtures');
 const FAKE_AVATAR_PATH = path.join(FIXTURES_DIR, 'test-avatar.jpg');
 const FAKE_GIF_PATH = path.join(FIXTURES_DIR, 'test-avatar.gif');
 
