@@ -2,7 +2,7 @@
   "name": "borarodar-e2e",
   "version": "1.0.0",
   "scripts": {
-    "test": "playwright test",
+    "test": "node scripts/test.js",
     "test:ui": "playwright test --ui"
   },
   "devDependencies": {
