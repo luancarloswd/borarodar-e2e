@@ -37,28 +37,28 @@ test.describe('BRAPP-40: Import KML in Nova Rota Step 2 to Auto-fill Cities', ()
 
   test('AC2: User clicks the \'Import KML\' button, selects a valid KML file, and upload completes → The origin, destination, and waypoint input fields are auto-filled, the map preview is updated with the route, and a \'Rota importada com sucesso\' toast notification is displayed.', async ({ page }) => {
     await page.goto('/routes/new');
-    
+
     const fileChooserPromise = page.waitForEvent('filechooser');
     await page.getByRole('button', { name: 'Import KML' }).click();
     const fileChooser = await fileChooserPromise;
-    
+
     // Assuming test.kml exists for the purpose of this test generation
     await fileChooser.setFiles('test.kml');
 
     await expect(page.getByText('Rota importada com sucesso')).toBeVisible();
     await expect(page.locator('input[placeholder*="origem"]')).not.toHaveValue('');
     await expect(page.locator('input[placeholder*="destino"]')).not.toHaveValue('');
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-40-ac-2.png', fullPage: true });
   });
 
   test('AC3: User clicks the \'Import KML\' button and selects an invalid file type or corrupt KML file → An \'Arquivo KML inválido ou não suportado\' toast notification is displayed.', async ({ page }) => {
     await page.goto('/routes/new');
-    
+
     const fileChooserPromise = page.waitForEvent('filechooser');
     await page.getByRole('button', { name: 'Import KML' }).click();
     const fileChooser = await fileChooserPromise;
-    
+
     // Uploading an invalid file
     await fileChooser.setFiles('invalid.txt');
 
@@ -68,7 +68,7 @@ test.describe('BRAPP-40: Import KML in Nova Rota Step 2 to Auto-fill Cities', ()
 
   test('AC4: User clicks the \'Import KML\' button and selects a KML file → A loading spinner is visible while the file is being processed, and then disappears upon completion.', async ({ page }) => {
     await page.goto('/routes/new');
-    
+
     const fileChooserPromise = page.waitForEvent('filechooser');
     await page.getByRole('button', { name: 'Import KML' }).click();
     const fileChooser = await fileChooserPromise;
@@ -76,7 +76,7 @@ test.describe('BRAPP-40: Import KML in Nova Rota Step 2 to Auto-fill Cities', ()
 
     const spinner = page.locator('.spinner, [class*="loading"], [role="progressbar"]');
     await expect(spinner).not.toBeVisible();
-    
+
     await page.screenshot({ path: 'screenshots/BRAPP-40-ac-4.png', fullPage: true });
   });
 });

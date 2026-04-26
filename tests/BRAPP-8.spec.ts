@@ -5,12 +5,7 @@ const BASE_URL = process.env.BASE_URL;
 const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
 const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
 
-if (!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD) {
-  test.skip(
-    'Skipping test: Required environment variables (BASE_URL, LOGIN_EMAIL, LOGIN_PASSWORD) are not set.',
-    { annotation: { type: 'error', description: 'Missing env vars' } }
-  );
-}
+test.skip(!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD, 'Required environment variables (BASE_URL, LOGIN_EMAIL, LOGIN_PASSWORD) are not set.');
 
 test.describe('BRAPP-8: Fix: Diagnostic button not rendering on motorcycle page', () => {
   test.beforeAll(() => {
