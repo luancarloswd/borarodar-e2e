@@ -1,6 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
+
 test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
   test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
@@ -9,20 +19,14 @@ test.describe('BRAPP-19: Remove Profile Button from \'Mais\' Menu', () => {
   test.beforeEach(async ({ page }) => {
     // Login flow
     await page.goto('/');
-    
+
     // Wait for login elements to be visible
     await page.waitForSelector('input[name="email"]');
     await page.waitForSelector('input[name="password"]');
     await page.waitForSelector('button[type="submit"]');
 
-    // Fill credentials
-    const loginEmail = process.env.LOGIN_EMAIL;
-    const loginPassword = process.env.LOGIN_PASSWORD;
-    if (!loginEmail || !loginPassword) {
-      throw new Error('LOGIN_EMAIL and LOGIN_PASSWORD environment variables must be set');
-    }
-    await page.fill('input[name="email"]', loginEmail);
-    await page.fill('input[name="password"]', loginPassword);
+    await page.fill('input[name="email"]', LOGIN_EMAIL!);
+    await page.fill('input[name="password"]', LOGIN_PASSWORD!);
     await page.click('button[type="submit"]');
 
     // Wait for dashboard/home to load by checking for a known element (e.g., navigation bar)

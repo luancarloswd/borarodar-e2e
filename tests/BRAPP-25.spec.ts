@@ -1,5 +1,15 @@
 import { test, expect } from '@playwright/test';
 
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
+
 test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
   test.beforeAll(async () => {
     // Ensure screenshots directory exists
@@ -9,9 +19,9 @@ test.describe('BRAPP-25: Manual Service Upload on Motorcycle Register', () => {
 
   test.beforeEach(async ({ page }) => {
     // Login flow
-    await page.goto('https://ride.borarodar.app');
-    await page.fill('input[type="email"], input[name="email"]', 'test@borarodar.app');
-    await page.fill('input[type="password"], input[name="password"]', 'borarodarapp');
+    await page.goto('/');
+    await page.fill('input[type="email"], input[name="email"]', LOGIN_EMAIL!);
+    await page.fill('input[type="password"], input[name="password"]', LOGIN_PASSWORD!);
     await page.click('button[type="submit"], button:has-text("Entrar")');
     await page.waitForURL(/.*dashboard|.*home|.*feed/, { timeout: 15000 });
   });

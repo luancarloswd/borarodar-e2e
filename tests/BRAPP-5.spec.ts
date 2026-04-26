@@ -1,20 +1,28 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
+
 test.describe('BRAPP-5: Fix text encoding and spurious \'0\' rendering on Novo Roteiro and route pages', () => {
   test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
   });
 
   test.beforeEach(async ({ page }) => {
-    const baseUrl = process.env.BASE_URL || 'https://ride.borarodar.app';
-    const email = process.env.LOGIN_EMAIL || 'test@borarodar.app';
-    const password = process.env.LOGIN_PASSWORD || 'borarodarapp';
+    const baseUrl = process.env.BASE_URL || '/';
 
     await page.goto(baseUrl);
     // Look for login form ╬ô├ç├╢ email + password fields, submit button
-    await page.fill('input[name="email"], input[type="email"]', email);
-    await page.fill('input[name="password"], input[type="password"]', password);
+    await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL!);
+    await page.fill('input[name="password"], input[type="password"]', LOGIN_PASSWORD!);
     await page.click('button[type="submit"], button:has-text("Entrar"), button:has-text("Login")');
     // Wait for dashboard/home to load
     await page.waitForLoadState('networkidle');
