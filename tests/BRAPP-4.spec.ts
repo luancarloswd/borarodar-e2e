@@ -1,9 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-const BASE_URL = process.env.BASE_URL ?? '/';
-const LOGIN_EMAIL = process.env.LOGIN_EMAIL ?? '';
-const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD ?? '';
+const BASE_URL = process.env.BASE_URL;
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
 
 test.describe('BRAPP-4: event slug routing, fallbacks, and error states', () => {
   test.beforeAll(() => {
@@ -12,13 +19,13 @@ test.describe('BRAPP-4: event slug routing, fallbacks, and error states', () => 
 
   test.beforeEach(async ({ page }) => {
     // Login flow
-    await page.goto(BASE_URL);
+    await page.goto(BASE_URL ?? '/');
     const emailField = page.locator('input[type="email"]');
     const passwordField = page.locator('input[type="password"]');
     const submitButton = page.locator('button[type="submit"]');
 
-    await emailField.fill(LOGIN_EMAIL);
-    await passwordField.fill(LOGIN_PASSWORD);
+    await emailField.fill(LOGIN_EMAIL!);
+    await passwordField.fill(LOGIN_PASSWORD!);
     await submitButton.click();
 
     // Wait for a deterministic post-login signal instead of a dashboard-specific test id

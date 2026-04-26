@@ -1,17 +1,27 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
+
 test.describe('BRAPP-33: Fix KMZ File Import for Routes', () => {
   test.beforeAll(() => {
     mkdirSync('screenshots', { recursive: true });
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://ride.borarodar.app');
-    
+    await page.goto('/');
+
     // Login flow
-    await page.fill('input[name="email"], input[type="email"]', 'test@borarodar.app');
-    await page.fill('input[name="password"], input[type="password"]', 'borodaraapp');
+    await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL!);
+    await page.fill('input[name="password"], input[type="password"]', LOGIN_PASSWORD!);
     await page.click('button[type="submit"], button:has-text("Login")');
 
     // Wait for dashboard/home to load
@@ -79,5 +89,4 @@ test.describe('BRAPP-33: Fix KMZ File Import for Routes', () => {
 
     await page.screenshot({ path: 'screenshots/BRAPP-33-ac-4.png', fullPage: true });
   });
-});
 });

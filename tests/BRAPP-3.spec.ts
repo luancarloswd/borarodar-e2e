@@ -1,16 +1,17 @@
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const BASE_URL = 'https://ride.borarodar.app';
-const LOGIN_EMAIL = 'test@borarodar.app';
-const LOGIN_PASSWORD = 'borarodarapp';
+const BASE_URL = process.env.BASE_URL;
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
 
 
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
@@ -38,7 +39,7 @@ const PROFILE_EDIT_ROUTES = [
 
 async function navigateToProfileEdit(page: import('@playwright/test').Page): Promise<void> {
   for (const route of PROFILE_EDIT_ROUTES) {
-    await page.goto(`${BASE_URL}${route}`);
+    await page.goto(`${BASE_URL!}${route}`);
     await page.waitForLoadState('networkidle');
     if (!page.url().includes('login') && !page.url().includes('signin')) return;
   }
@@ -71,7 +72,7 @@ test.describe('BRAPP-3: User Profile Logo Image Change ╬ô├ç├╢ Frontend
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
+    await page.goto(BASE_URL!);
 
     await page.waitForSelector(
       'input[type="email"], input[name="email"], input[placeholder*="email" i], input[placeholder*="e-mail" i]',
@@ -85,8 +86,8 @@ test.describe('BRAPP-3: User Profile Logo Image Change ╬ô├ç├╢ Frontend
       .first();
     const passwordInput = page.locator('input[type="password"]').first();
 
-    await emailInput.fill(LOGIN_EMAIL);
-    await passwordInput.fill(LOGIN_PASSWORD);
+    await emailInput.fill(LOGIN_EMAIL!);
+    await passwordInput.fill(LOGIN_PASSWORD!);
 
     await page.screenshot({ path: 'screenshots/BRAPP-3-login-filled.png', fullPage: true });
 

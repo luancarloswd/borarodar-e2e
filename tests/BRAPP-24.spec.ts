@@ -1,9 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-const BASE_URL = process.env.BASE_URL || 'https://ride.borarodar.app';
-const LOGIN_EMAIL = process.env.LOGIN_EMAIL || 'test@borarodar.app';
-const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD || 'borarodarapp';
+const BASE_URL = process.env.BASE_URL;
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
 
 test.describe('BRAPP-24: Route Breaks Within Legs (Out-and-Back Detours)', () => {
   test.beforeAll(() => {
@@ -11,10 +18,10 @@ test.describe('BRAPP-24: Route Breaks Within Legs (Out-and-Back Detours)', () =>
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
+    await page.goto(BASE_URL!);
     // Login flow
-    await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL);
-    await page.fill('input[name="password"], input[type="password"]', LOGIN_PASSWORD);
+    await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL!);
+    await page.fill('input[name="password"], input[type="password"]', LOGIN_PASSWORD!);
     
     const loginUrl = page.url();
     await page.click('button[type="submit"]');

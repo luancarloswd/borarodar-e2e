@@ -1,25 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
-function requireEnv(name: 'BASE_URL' | 'LOGIN_EMAIL' | 'LOGIN_PASSWORD'): string {
-  const value = process.env[name];
+const BASE_URL = process.env.BASE_URL;
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
 
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-
-  return value;
+if (!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping BRAPP-16 tests: Required environment variables (BASE_URL, LOGIN_EMAIL, LOGIN_PASSWORD) are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
 }
 
-const BASE_URL = requireEnv('BASE_URL');
-const LOGIN_EMAIL = requireEnv('LOGIN_EMAIL');
-const LOGIN_PASSWORD = requireEnv('LOGIN_PASSWORD');
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const screenshotsDir = path.join(process.cwd(), 'screenshots');
 
 test.describe('BRAPP-16: SDD Message Status Updates', () => {
@@ -28,11 +21,11 @@ test.describe('BRAPP-16: SDD Message Status Updates', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
-    
+    await page.goto(BASE_URL!);
+
     // Login flow
-    await page.getByLabel(/email/i).fill(LOGIN_EMAIL);
-    await page.getByLabel(/password/int).fill(LOGIN_PASSWORD);
+    await page.getByLabel(/email/i).fill(LOGIN_EMAIL!);
+    await page.getByLabel(/password/i).fill(LOGIN_PASSWORD!);
     await page.getByRole('button', { name: /login|entrar/i }).click();
     
     // Wait for dashboard/home to load

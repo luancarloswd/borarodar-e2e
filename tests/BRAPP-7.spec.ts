@@ -1,9 +1,16 @@
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 
-const BASE_URL = 'https://ride.borarodar.app';
-const LOGIN_EMAIL = 'test@borarodar.app';
-const LOGIN_PASSWORD = 'borarodarapp';
+const BASE_URL = process.env.BASE_URL;
+const LOGIN_EMAIL = process.env.LOGIN_EMAIL;
+const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!BASE_URL || !LOGIN_EMAIL || !LOGIN_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
 
 test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer Profile', () => {
   test.beforeAll(() => {
@@ -13,7 +20,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
+    await page.goto(BASE_URL!);
 
     // Wait for login form
     await page.waitForSelector('input[type="email"], input[name="email"], input[placeholder*="email" i], input[placeholder*="e-mail" i]', { timeout: 15000 });
@@ -23,8 +30,8 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
     const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i], input[placeholder*="e-mail" i]').first();
     const passwordInput = page.locator('input[type="password"]').first();
 
-    await emailInput.fill(LOGIN_EMAIL);
-    await passwordInput.fill(LOGIN_PASSWORD);
+    await emailInput.fill(LOGIN_EMAIL!);
+    await passwordInput.fill(LOGIN_PASSWORD!);
 
     await page.screenshot({ path: 'screenshots/BRAPP-7-login-filled.png', fullPage: true });
 
@@ -39,7 +46,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
 
   test('should display city check-in activity event with Ver button in the feed', async ({ page }) => {
     // Navigate to feed if not already there
-    const feedUrl = `${BASE_URL}/feed`;
+    const feedUrl = `${BASE_URL!}/feed`;
     await page.goto(feedUrl);
     await page.waitForLoadState('networkidle');
 
@@ -66,7 +73,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test('should navigate to explorer profile when Ver button is clicked on city check-in event', async ({ page }) => {
-    await page.goto(`${BASE_URL}/feed`);
+    await page.goto(`${BASE_URL!}/feed`);
     await page.waitForLoadState('networkidle');
 
     await page.screenshot({ path: 'screenshots/BRAPP-7-feed-before-click.png', fullPage: true });
@@ -96,7 +103,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test('should display explorer profile with user stats after clicking Ver on check-in', async ({ page }) => {
-    await page.goto(`${BASE_URL}/feed`);
+    await page.goto(`${BASE_URL!}/feed`);
     await page.waitForLoadState('networkidle');
 
     const verButton = page.locator('button:has-text("Ver"), a:has-text("Ver")').first();
@@ -145,7 +152,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test('should show Follow or Editar Perfil button on explorer profile based on auth state', async ({ page }) => {
-    await page.goto(`${BASE_URL}/feed`);
+    await page.goto(`${BASE_URL!}/feed`);
     await page.waitForLoadState('networkidle');
 
     const verButton = page.locator('button:has-text("Ver"), a:has-text("Ver")').first();
@@ -176,7 +183,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test('should not navigate to city/place detail page when clicking Ver button on check-in event', async ({ page }) => {
-    await page.goto(`${BASE_URL}/feed`);
+    await page.goto(`${BASE_URL!}/feed`);
     await page.waitForLoadState('networkidle');
 
     const verButton = page.locator('button:has-text("Ver"), a:has-text("Ver")').first();
@@ -203,7 +210,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test('should navigate to explorer profile when clicking author avatar or displayName on check-in card', async ({ page }) => {
-    await page.goto(`${BASE_URL}/feed`);
+    await page.goto(`${BASE_URL!}/feed`);
     await page.waitForLoadState('networkidle');
 
     await page.screenshot({ path: 'screenshots/BRAPP-7-feed-for-avatar-test.png', fullPage: true });
@@ -227,7 +234,7 @@ test.describe('BRAPP-7: Ver on Feed Check-in Navigates to Event Author Explorer 
   });
 
   test('should show recent activity list on explorer profile', async ({ page }) => {
-    await page.goto(`${BASE_URL}/feed`);
+    await page.goto(`${BASE_URL!}/feed`);
     await page.waitForLoadState('networkidle');
 
     const verButton = page.locator('button:has-text("Ver"), a:has-text("Ver")').first();

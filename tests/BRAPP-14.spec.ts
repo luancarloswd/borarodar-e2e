@@ -1,9 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-const BASE_URL = process.env.BASE_URL || 'https://ride.borarodar.app';
-const TEST_EMAIL = process.env.LOGIN_EMAIL || 'test@borarodar.app';
-const TEST_PASSWORD = process.env.LOGIN_PASSWORD || 'borodarlover'; 
+const BASE_URL = process.env.BASE_URL;
+const TEST_EMAIL = process.env.LOGIN_EMAIL;
+const TEST_PASSWORD = process.env.LOGIN_PASSWORD;
+
+if (!BASE_URL || !TEST_EMAIL || !TEST_PASSWORD) {
+  test.skip(
+    'Skipping: Required environment variables are not set.',
+    { annotation: { type: 'error', description: 'Missing env vars' } }
+  );
+}
 const TEST_GEOLOCATION = {
   latitude: -23.55052,
   longitude: -46.633308,
@@ -49,21 +56,21 @@ async function postToFirstAvailableEndpoint(
 }
 
 async function login(page) {
-  await page.goto(BASE_URL);
+  await page.goto(BASE_URL!);
 
-  await page.fill('input[name="email"], input[type="email"]', TEST_EMAIL);
-  await page.fill('input[name="password"], input[type="password"]', TEST_PASSWORD);
+  await page.fill('input[name="email"], input[type="email"]', TEST_EMAIL!);
+  await page.fill('input[name="password"], input[type="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"], button:has-text("Entrar"), button:has-text("Login")');
-  
-  await page.waitForURL((url) => url.toString() !== `${BASE_URL}/`);
+
+  await page.waitForURL((url) => url.toString() !== `${BASE_URL!}/`);
 }
 
 async function ensureNoActiveRide(page) {
   const cleanupEndpoints = [
-    `${BASE_URL}/rides/end`,
-    `${BASE_URL}/rides/discard`,
-    `${BASE_URL}/api/rides/end`,
-    `${BASE_URL}/api/rides/discard`,
+    `${BASE_URL!}/rides/end`,
+    `${BASE_URL!}/rides/discard`,
+    `${BASE_URL!}/api/rides/end`,
+    `${BASE_URL!}/api/rides/discard`,
   ];
 
   for (const endpoint of cleanupEndpoints) {
@@ -87,7 +94,7 @@ async function ensureNoActiveRide(page) {
 }
 
 async function startActiveRide(page, context) {
-  await context.grantPermissions(['geolocation'], { origin: BASE_URL });
+  await context.grantPermissions(['geolocation'], { origin: BASE_URL! });
   await context.setGeolocation(TEST_GEOLOCATION);
 
   await ensureNoActiveRide(page);
@@ -95,8 +102,8 @@ async function startActiveRide(page, context) {
   await postToFirstAvailableEndpoint(
     page,
     [
-      `${BASE_URL}/rides/start`,
-      `${BASE_URL}/api/rides/start`,
+      `${BASE_URL!}/rides/start`,
+      `${BASE_URL!}/api/rides/start`,
     ],
     TEST_GEOLOCATION,
     [200, 201, 204, 409],
@@ -109,7 +116,7 @@ test.describe('BRAPP-14: Auto-Link Gas Supply to Active Ride Transparently', () 
   });
 
   test.beforeEach(async ({ page, context }) => {
-    await context.grantPermissions(['geolocation'], { origin: BASE_URL });
+    await context.grantPermissions(['geolocation'], { origin: BASE_URL! });
     await context.setGeolocation(TEST_GEOLOCATION); // Error here, should be TEST_GEOLOCATION
 
     // Login flow
@@ -125,7 +132,7 @@ test.describe('BRAPP-14: Auto-Link Gas Supply to Active Ride Transparently', () 
 
     // Navigate to the fuel supply route with a known active ride state
     // Instead of direct navigation, follow the prescribed flow: go to /motorcycles, open a moto card, click add fuel
-    await page.goto(`${BASE_URL}/motorcycles`);
+    await page.goto(`${BASE_URL!}/motorcycles`);
     const motoCard = page.locator('.moto-card').first(); // Assuming this existence based on context
     await motoCard.click();
     await page.getByTestId('add-fuel-btn').click();
@@ -141,7 +148,7 @@ test.describe('BRAPP-14: Auto-Link Gas Supply to Active Ride Transparently', () 
     await startActiveRide(page, context);
 
     // Follow prescribed flow
-    await page.goto(`${BASE_URL}/motorcycles`);
+    await page.goto(`${BASE_URL!}/motorcycles`);
     const motoCard = page.locator('.moto-card').first();
     await motoCard.click();
     await page.getByTestId('add-fuel-btn').click();
@@ -166,7 +173,7 @@ test.describe('BRAPP-14: Auto-Link Gas Supply to Active Ride Transparently', () 
     await ensureNoActiveRide(page);
 
     // Navigate via the prescribed flow
-    await page.goto(`${BASE_URL}/motorcycles`);
+    await page.goto(`${BASE_URL!}/motorcycles`);
     const motoCard = page.locator('.moto-card').first();
     await motoCard.click();
     await page.getByTestId('add-fuel-btn').click();
