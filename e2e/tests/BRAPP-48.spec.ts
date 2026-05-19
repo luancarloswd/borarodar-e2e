@@ -57,7 +57,7 @@ test.describe('BRAPP-48: Bugfix: Google Maps JavaScript API Error on Routes Page
     expect(apiErrorMessages.length).toBe(0);
   });
 
-  test('AC1: User navigates to the routes page → Google Maps loads without any JavaScript API errors in the console', async ({ page }) => {
+  test('AC1: User navigates to the routes page → Google Maps loads without any JavaScript API errors in the console (alternate check)', async ({ page }) => {
     // Navigate to the routes page
     await page.goto('https://ride.borarodar.app/routes');
     

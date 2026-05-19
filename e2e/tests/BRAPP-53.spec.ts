@@ -40,7 +40,7 @@ test.describe('BRAPP-53: Fix: Manual Route Registration Fails Due to Incorrect W
     expect(await page.locator('div:has-text("Route created successfully")').isVisible()).toBe(true);
   });
 
-  test('AC1: User fills in the manual route registration form with valid waypoint coordinates and submits → route is created successfully and a success confirmation is displayed', async ({ page }) => {
+  test('AC1: User fills in the manual route registration form with valid waypoint coordinates and submits → route is created successfully and a success confirmation is displayed (retry check)', async ({ page }) => {
     // Navigate to route creation page
     await page.locator('button:has-text("Create Route")').click();
     await page.waitForSelector('h2:has-text("Manual Route Registration")');
